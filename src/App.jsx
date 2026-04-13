@@ -493,21 +493,31 @@ export default function CashCounter() {
   };
 
   const ModeToggle = ({ mode, onChange }) => (
-    <div style={{ display: "flex", background: "#0f1117", border: "1px solid #2a2d3a", borderRadius: 6, overflow: "hidden" }}>
+    <div style={{
+      display: "flex",
+      background: "#0b0d14",
+      border: "1px solid #1e2133",
+      borderRadius: 8,
+      overflow: "hidden",
+      padding: 2,
+      gap: 2,
+    }}>
       {["number", "sum"].map(m => (
         <button
           key={m}
           onClick={() => onChange(m)}
           style={{
-            padding: "4px 11px",
+            padding: "5px 13px",
             border: "none",
+            borderRadius: 6,
             background: mode === m ? "#00e5a0" : "transparent",
-            color: mode === m ? "#0f1117" : "#666",
+            color: mode === m ? "#0b0d14" : "#555",
             fontFamily: "inherit",
-            fontSize: 11,
+            fontSize: 12,
             cursor: "pointer",
             fontWeight: mode === m ? 700 : 400,
-            transition: "all .15s",
+            transition: "all .2s",
+            letterSpacing: ".3px",
           }}
         >
           {m === "number" ? "מספר" : "סכום"}
@@ -517,313 +527,566 @@ export default function CashCounter() {
   );
 
   return (
-    <div dir="rtl" style={{ minHeight: "100vh", background: "#0f1117", color: "#e8e8e8", fontFamily: "'Courier New', 'Consolas', monospace", padding: "24px 16px 64px" }}>
+    <div dir="rtl" style={{
+      minHeight: "100vh",
+      background: "#0b0d14",
+      color: "#d0d4e8",
+      fontFamily: "'Heebo', sans-serif",
+      padding: "0 0 80px",
+    }}>
       <style>{`
-        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-        .card { background:#1a1d27; border:1px solid #2a2d3a; border-radius:12px; padding:20px; }
-        .inp { background:#0f1117; border:1px solid #2a2d3a; border-radius:8px; color:#e8e8e8; padding:10px 12px; font-family:inherit; font-size:15px; width:100%; box-sizing:border-box; outline:none; transition:border-color .2s; }
-        .inp:focus { border-color:#00e5a0; }
-        .inp.err { border-color:#ff6b35; }
-        .inp::placeholder { color:#444; }
-        .err-msg { color:#ff9a6c; font-size:12px; margin-top:4px; }
-        .btn { width:100%; padding:14px; border:none; border-radius:10px; background:linear-gradient(135deg,#00e5a0,#00b37d); color:#0f1117; font-size:16px; font-family:inherit; font-weight:700; cursor:pointer; letter-spacing:.5px; transition:filter .15s, transform .1s; }
-        .btn:hover { filter:brightness(1.1); }
-        .btn:active { transform:scale(.98); }
-        .btn-report { width:100%; padding:12px; border:1px solid #2a2d3a; border-radius:10px; background:#1a1d27; color:#888; font-size:14px; font-family:inherit; font-weight:600; cursor:pointer; transition:all .15s; margin-top:10px; }
-        .btn-report:hover { border-color:#00e5a0; color:#00e5a0; background:#0d1f18; }
-        .btn-report:active { transform:scale(.98); }
-        .pill { display:inline-block; border-radius:6px; padding:2px 8px; font-size:13px; font-weight:700; margin-left:6px; }
-        .result-card { animation: fadeIn .3s ease; }
-        .row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #1e2030; font-size:14px; }
-        .notice { border-radius:8px; padding:10px 12px; font-size:13px; margin-top:10px; }
-        .sw-track { width:36px; height:20px; background:#2a2d3a; border-radius:10px; position:relative; cursor:pointer; border:none; flex-shrink:0; transition:background .2s; }
-        .sw-track.on { background:#00e5a0; }
-        .sw-track::after { content:''; position:absolute; width:14px; height:14px; background:white; border-radius:50%; top:3px; right:3px; transition:right .2s; }
-        .sw-track.on::after { right:19px; }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: none; }
+        }
+        @keyframes resultIn {
+          from { opacity: 0; transform: translateY(12px) scale(.99); }
+          to   { opacity: 1; transform: none; }
+        }
+        @keyframes glowPulse {
+          0%, 100% { box-shadow: 0 0 0px rgba(0,229,160,0); }
+          50%       { box-shadow: 0 0 28px rgba(0,229,160,.12); }
+        }
+        @keyframes shimmer {
+          from { background-position: -200% center; }
+          to   { background-position:  200% center; }
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        .card {
+          background: #13151e;
+          border: 1px solid #1e2133;
+          border-radius: 16px;
+          padding: 22px;
+        }
+        .anim-1 { animation: slideUp .45s cubic-bezier(.22,1,.36,1) .05s both; }
+        .anim-2 { animation: slideUp .45s cubic-bezier(.22,1,.36,1) .15s both; }
+        .anim-3 { animation: slideUp .45s cubic-bezier(.22,1,.36,1) .25s both; }
+
+        .inp {
+          background: #0e1020;
+          border: 1px solid #1e2133;
+          border-radius: 10px;
+          color: #d0d4e8;
+          padding: 9px 11px;
+          font-family: inherit;
+          font-size: 15px;
+          width: 100%;
+          outline: none;
+          transition: border-color .2s, background .2s;
+          -moz-appearance: textfield;
+        }
+        .inp::-webkit-outer-spin-button,
+        .inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .inp:focus { border-color: #00e5a0; background: #0b1a14; }
+        .inp.err { border-color: #ff6b35; }
+        .inp::placeholder { color: #282b3e; }
+        .inp[readonly] { opacity: .32; cursor: default; }
+
+        .err-msg { color: #ff9a6c; font-size: 12px; margin-top: 4px; }
+
+        .section-title {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 1.8px;
+          text-transform: uppercase;
+          color: #383c58;
+        }
+
+        .sub-label {
+          font-size: 10px;
+          color: #383c58;
+          margin-bottom: 3px;
+          letter-spacing: .6px;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        .denom-chip {
+          display: inline-flex;
+          align-items: center;
+          padding: 2px 9px;
+          border-radius: 5px;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: .3px;
+          margin-bottom: 8px;
+        }
+        .denom-chip.coin {
+          background: #0a1f16;
+          border: 1px solid #00e5a022;
+          color: #00e5a0;
+        }
+        .denom-chip.bill {
+          background: #1a1504;
+          border: 1px solid #ffd16622;
+          color: #ffd166;
+        }
+
+        .btn {
+          width: 100%;
+          padding: 15px;
+          border: none;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #00e5a0, #00b37d);
+          color: #0b0d14;
+          font-size: 16px;
+          font-family: inherit;
+          font-weight: 700;
+          cursor: pointer;
+          letter-spacing: .5px;
+          transition: filter .15s, transform .1s;
+          position: relative;
+          overflow: hidden;
+        }
+        .btn::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.18) 50%, transparent 100%);
+          background-size: 200% auto;
+          opacity: 0;
+          transition: opacity .25s;
+        }
+        .btn:hover::after { opacity: 1; animation: shimmer 1.1s linear infinite; }
+        .btn:hover { filter: brightness(1.07); }
+        .btn:active { transform: scale(.98); }
+
+        .btn-report {
+          width: 100%;
+          padding: 13px;
+          border: 1px solid #1e2133;
+          border-radius: 12px;
+          background: transparent;
+          color: #555;
+          font-size: 14px;
+          font-family: inherit;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all .2s;
+          margin-top: 10px;
+          letter-spacing: .3px;
+        }
+        .btn-report:hover { border-color: #00e5a033; color: #00e5a0; background: #0d1f1855; }
+        .btn-report:active { transform: scale(.98); }
+
+        .pill {
+          display: inline-block;
+          border-radius: 6px;
+          padding: 2px 8px;
+          font-size: 12px;
+          font-weight: 700;
+          margin-left: 6px;
+        }
+
+        .result-card { animation: resultIn .38s cubic-bezier(.22,1,.36,1) both; }
+
+        .row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid #181b28;
+          font-size: 14px;
+        }
+        .row:last-child { border-bottom: none; }
+
+        .notice {
+          border-radius: 10px;
+          padding: 10px 14px;
+          font-size: 13px;
+          margin-top: 12px;
+          line-height: 1.55;
+        }
+
+        .sw-track {
+          width: 36px;
+          height: 20px;
+          background: #1e2133;
+          border-radius: 10px;
+          position: relative;
+          cursor: pointer;
+          border: none;
+          flex-shrink: 0;
+          transition: background .2s;
+        }
+        .sw-track.on { background: #00e5a0; }
+        .sw-track::after {
+          content: '';
+          position: absolute;
+          width: 14px;
+          height: 14px;
+          background: white;
+          border-radius: 50%;
+          top: 3px;
+          right: 3px;
+          transition: right .2s;
+        }
+        .sw-track.on::after { right: 19px; }
+
+        .register-exact {
+          border-color: #00e5a055 !important;
+          animation: glowPulse 2.8s ease-in-out infinite;
+        }
+
+        .dot-grid {
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          background-image: radial-gradient(circle, #1c1f30 1px, transparent 1px);
+          background-size: 28px 28px;
+          opacity: .5;
+          pointer-events: none;
+        }
       `}</style>
 
-      <div style={{ textAlign: "center", marginBottom: 28 }}>
-        <div style={{ fontSize: 28, marginBottom: 4 }}>🏧</div>
-        <h1 style={{ margin: 0, fontSize: 22, letterSpacing: 1, color: "#00e5a0" }}>ספירת קופה</h1>
-        <p style={{ margin: "6px 0 0", color: "#555", fontSize: 13 }}>יעד: ₪1,000 בקופה</p>
-      </div>
+      <div className="dot-grid" />
 
-      {/* Coins card */}
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <span style={{ fontSize: 13, color: "#888" }}>מטבעות</span>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {!simpleCoins && <ModeToggle mode={coinMode} onChange={handleCoinModeChange} />}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <button
-                className={`sw-track${simpleCoins ? " on" : ""}`}
-                onClick={() => { setSimpleCoins(s => !s); setErrors({}); setResult(null); }}
-              />
-              <span style={{ fontSize: 11, color: "#666" }}>פשוט</span>
-            </div>
+      {/* Sticky header */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "rgba(11,13,20,.88)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        borderBottom: "1px solid #1a1d2e",
+        padding: "12px 20px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 24,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 34, height: 34, borderRadius: 9,
+            background: "linear-gradient(135deg, #00e5a0, #00b37d)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 17, flexShrink: 0,
+          }}>💰</div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#e0e4f0", lineHeight: 1.1 }}>ספירת קופה</div>
+            <div style={{ fontSize: 11, color: "#383c58", marginTop: 1, fontWeight: 500 }}>יעד: ₪1,000 בקופה</div>
           </div>
         </div>
-
-        {simpleCoins ? (
-          <div>
-            <input
-              className={`inp${errors.simpleCoins ? " err" : ""}`}
-              type="number"
-              value={simpleCoinsInput}
-              onChange={e => { setSimpleCoinsInput(e.target.value); setErrors(p => ({ ...p, simpleCoins: validateSimpleCoins(e.target.value) })); }}
-              placeholder={'סה"כ מטבעות (₪)'}
-              step="0.1"
-              min="0"
-            />
-            {errors.simpleCoins && <div className="err-msg">{errors.simpleCoins}</div>}
-          </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {COIN_KEYS.map(k => {
-              const denom = COIN_VALUES[k];
-              const rawVal = coinInputs[k];
-              let numberDisplayVal, sumDisplayVal;
-              if (coinMode === "number") {
-                numberDisplayVal = rawVal;
-                const count = parseInt(rawVal) || 0;
-                sumDisplayVal = rawVal !== "" && count > 0 ? String(Math.round(count * denom * 100) / 100) : "";
-              } else {
-                sumDisplayVal = rawVal;
-                const sum = parseFloat(rawVal) || 0;
-                const count = rawVal !== "" && sum > 0 ? Math.round(sum / denom) : 0;
-                numberDisplayVal = rawVal !== "" && count > 0 ? String(count) : "";
-              }
-              return (
-                <div key={k}>
-                  <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>
-                    {COIN_LABELS[k]}
-                  </label>
-                  <div style={{ display: "flex", gap: 4 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 10, color: "#555", marginBottom: 2 }}>כמות</div>
-                      <input
-                        className={`inp${errors[`coin_${k}`] && coinMode === "number" ? " err" : ""}`}
-                        type="number"
-                        value={numberDisplayVal}
-                        readOnly={coinMode !== "number"}
-                        onChange={coinMode === "number" ? e => {
-                          setCoinInputs(p => ({ ...p, [k]: e.target.value }));
-                          setErrors(p => ({ ...p, [`coin_${k}`]: validateCoinField(k, e.target.value, "number") }));
-                        } : undefined}
-                        placeholder="0"
-                        step="1"
-                        min="0"
-                        style={coinMode !== "number" ? { opacity: 0.4, cursor: "default" } : {}}
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 10, color: "#555", marginBottom: 2 }}>סכום (₪)</div>
-                      <input
-                        className={`inp${errors[`coin_${k}`] && coinMode === "sum" ? " err" : ""}`}
-                        type="number"
-                        value={sumDisplayVal}
-                        readOnly={coinMode !== "sum"}
-                        onChange={coinMode === "sum" ? e => {
-                          setCoinInputs(p => ({ ...p, [k]: e.target.value }));
-                          setErrors(p => ({ ...p, [`coin_${k}`]: validateCoinField(k, e.target.value, "sum") }));
-                        } : undefined}
-                        placeholder="0.00"
-                        step={String(denom)}
-                        min="0"
-                        style={coinMode !== "sum" ? { opacity: 0.4, cursor: "default" } : {}}
-                      />
-                    </div>
-                  </div>
-                  {errors[`coin_${k}`] && <div className="err-msg">{errors[`coin_${k}`]}</div>}
-                </div>
-              );
-            })}
+        {totalInventory > 0 && (
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: 10, color: "#383c58", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase" }}>מלאי</div>
+            <div style={{
+              fontSize: 19, fontWeight: 800, lineHeight: 1.1,
+              color: totalInventory >= 1000 ? "#00e5a0" : "#e0e4f0",
+            }}>
+              {fmt(totalInventory)}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Bills card */}
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <span style={{ fontSize: 13, color: "#888" }}>שטרות</span>
-          <ModeToggle mode={billMode} onChange={handleBillModeChange} />
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {BILL_DENOMS.map(d => {
-            const rawVal = billInputs[d];
-            let numberDisplayVal, sumDisplayVal;
-            if (billMode === "number") {
-              numberDisplayVal = rawVal;
-              const count = parseInt(rawVal) || 0;
-              sumDisplayVal = rawVal !== "" && count > 0 ? String(count * d) : "";
-            } else {
-              sumDisplayVal = rawVal;
-              const sum = parseFloat(rawVal) || 0;
-              const count = rawVal !== "" && sum > 0 ? Math.round(sum / d) : 0;
-              numberDisplayVal = rawVal !== "" && count > 0 ? String(count) : "";
-            }
-            return (
-              <div key={d}>
-                <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 4 }}>
-                  ₪{d}
-                </label>
-                <div style={{ display: "flex", gap: 4 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, color: "#555", marginBottom: 2 }}>כמות</div>
-                    <input
-                      className={`inp${errors[`bill_${d}`] && billMode === "number" ? " err" : ""}`}
-                      type="number"
-                      value={numberDisplayVal}
-                      readOnly={billMode !== "number"}
-                      onChange={billMode === "number" ? e => {
-                        setBillInputs(p => ({ ...p, [d]: e.target.value }));
-                        setErrors(p => ({ ...p, [`bill_${d}`]: validateBillField(d, e.target.value, "number") }));
-                      } : undefined}
-                      placeholder="0"
-                      step="1"
-                      min="0"
-                      style={billMode !== "number" ? { opacity: 0.4, cursor: "default" } : {}}
-                    />
+      <div style={{ maxWidth: 500, margin: "0 auto", padding: "0 16px", position: "relative", zIndex: 1 }}>
+
+        {/* Coins card */}
+        <div className="card anim-1" style={{ marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+            <span className="section-title">מטבעות</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {!simpleCoins && <ModeToggle mode={coinMode} onChange={handleCoinModeChange} />}
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <button
+                  className={`sw-track${simpleCoins ? " on" : ""}`}
+                  onClick={() => { setSimpleCoins(s => !s); setErrors({}); setResult(null); }}
+                />
+                <span style={{ fontSize: 11, color: "#383c58", fontWeight: 600 }}>פשוט</span>
+              </div>
+            </div>
+          </div>
+
+          {simpleCoins ? (
+            <div>
+              <input
+                className={`inp${errors.simpleCoins ? " err" : ""}`}
+                type="number"
+                value={simpleCoinsInput}
+                onChange={e => { setSimpleCoinsInput(e.target.value); setErrors(p => ({ ...p, simpleCoins: validateSimpleCoins(e.target.value) })); }}
+                placeholder={'סה"כ מטבעות (₪)'}
+                step="0.1"
+                min="0"
+              />
+              {errors.simpleCoins && <div className="err-msg">{errors.simpleCoins}</div>}
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {COIN_KEYS.map(k => {
+                const denom = COIN_VALUES[k];
+                const rawVal = coinInputs[k];
+                let numberDisplayVal, sumDisplayVal;
+                if (coinMode === "number") {
+                  numberDisplayVal = rawVal;
+                  const count = parseInt(rawVal) || 0;
+                  sumDisplayVal = rawVal !== "" && count > 0 ? String(Math.round(count * denom * 100) / 100) : "";
+                } else {
+                  sumDisplayVal = rawVal;
+                  const sum = parseFloat(rawVal) || 0;
+                  const count = rawVal !== "" && sum > 0 ? Math.round(sum / denom) : 0;
+                  numberDisplayVal = rawVal !== "" && count > 0 ? String(count) : "";
+                }
+                return (
+                  <div key={k}>
+                    <div className="denom-chip coin">{COIN_LABELS[k]}</div>
+                    <div style={{ display: "flex", gap: 5 }}>
+                      <div style={{ flex: 1 }}>
+                        <div className="sub-label">כמות</div>
+                        <input
+                          className={`inp${errors[`coin_${k}`] && coinMode === "number" ? " err" : ""}`}
+                          type="number"
+                          value={numberDisplayVal}
+                          readOnly={coinMode !== "number"}
+                          onChange={coinMode === "number" ? e => {
+                            setCoinInputs(p => ({ ...p, [k]: e.target.value }));
+                            setErrors(p => ({ ...p, [`coin_${k}`]: validateCoinField(k, e.target.value, "number") }));
+                          } : undefined}
+                          placeholder="0"
+                          step="1"
+                          min="0"
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="sub-label">סכום ₪</div>
+                        <input
+                          className={`inp${errors[`coin_${k}`] && coinMode === "sum" ? " err" : ""}`}
+                          type="number"
+                          value={sumDisplayVal}
+                          readOnly={coinMode !== "sum"}
+                          onChange={coinMode === "sum" ? e => {
+                            setCoinInputs(p => ({ ...p, [k]: e.target.value }));
+                            setErrors(p => ({ ...p, [`coin_${k}`]: validateCoinField(k, e.target.value, "sum") }));
+                          } : undefined}
+                          placeholder="0.00"
+                          step={String(denom)}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    {errors[`coin_${k}`] && <div className="err-msg">{errors[`coin_${k}`]}</div>}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, color: "#555", marginBottom: 2 }}>סכום (₪)</div>
-                    <input
-                      className={`inp${errors[`bill_${d}`] && billMode === "sum" ? " err" : ""}`}
-                      type="number"
-                      value={sumDisplayVal}
-                      readOnly={billMode !== "sum"}
-                      onChange={billMode === "sum" ? e => {
-                        setBillInputs(p => ({ ...p, [d]: e.target.value }));
-                        setErrors(p => ({ ...p, [`bill_${d}`]: validateBillField(d, e.target.value, "sum") }));
-                      } : undefined}
-                      placeholder={String(d * 3)}
-                      step={String(d)}
-                      min="0"
-                      style={billMode !== "sum" ? { opacity: 0.4, cursor: "default" } : {}}
-                    />
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Bills card */}
+        <div className="card anim-2" style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+            <span className="section-title">שטרות</span>
+            <ModeToggle mode={billMode} onChange={handleBillModeChange} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {BILL_DENOMS.map(d => {
+              const rawVal = billInputs[d];
+              let numberDisplayVal, sumDisplayVal;
+              if (billMode === "number") {
+                numberDisplayVal = rawVal;
+                const count = parseInt(rawVal) || 0;
+                sumDisplayVal = rawVal !== "" && count > 0 ? String(count * d) : "";
+              } else {
+                sumDisplayVal = rawVal;
+                const sum = parseFloat(rawVal) || 0;
+                const count = rawVal !== "" && sum > 0 ? Math.round(sum / d) : 0;
+                numberDisplayVal = rawVal !== "" && count > 0 ? String(count) : "";
+              }
+              return (
+                <div key={d}>
+                  <div className="denom-chip bill">₪{d}</div>
+                  <div style={{ display: "flex", gap: 5 }}>
+                    <div style={{ flex: 1 }}>
+                      <div className="sub-label">כמות</div>
+                      <input
+                        className={`inp${errors[`bill_${d}`] && billMode === "number" ? " err" : ""}`}
+                        type="number"
+                        value={numberDisplayVal}
+                        readOnly={billMode !== "number"}
+                        onChange={billMode === "number" ? e => {
+                          setBillInputs(p => ({ ...p, [d]: e.target.value }));
+                          setErrors(p => ({ ...p, [`bill_${d}`]: validateBillField(d, e.target.value, "number") }));
+                        } : undefined}
+                        placeholder="0"
+                        step="1"
+                        min="0"
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="sub-label">סכום ₪</div>
+                      <input
+                        className={`inp${errors[`bill_${d}`] && billMode === "sum" ? " err" : ""}`}
+                        type="number"
+                        value={sumDisplayVal}
+                        readOnly={billMode !== "sum"}
+                        onChange={billMode === "sum" ? e => {
+                          setBillInputs(p => ({ ...p, [d]: e.target.value }));
+                          setErrors(p => ({ ...p, [`bill_${d}`]: validateBillField(d, e.target.value, "sum") }));
+                        } : undefined}
+                        placeholder={String(d * 3)}
+                        step={String(d)}
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                  {errors[`bill_${d}`] && <div className="err-msg">{errors[`bill_${d}`]}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="anim-3">
+          <button className="btn" onClick={handleCalc}>חשב חלוקה אופטימלית</button>
+          <button
+            className="btn-report"
+            onClick={() => {
+              const newErrors = {};
+              if (simpleCoins) {
+                const e = validateSimpleCoins(simpleCoinsInput);
+                if (e) newErrors.simpleCoins = e;
+              } else {
+                COIN_KEYS.forEach(k => {
+                  const e = validateCoinField(k, coinInputs[k], coinMode);
+                  if (e) newErrors[`coin_${k}`] = e;
+                });
+              }
+              BILL_DENOMS.forEach(d => {
+                const e = validateBillField(d, billInputs[d], billMode);
+                if (e) newErrors[`bill_${d}`] = e;
+              });
+              if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+              generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, billInputs, billMode });
+            }}
+          >
+            📊 הפק דוח ספירה
+          </button>
+        </div>
+
+        {/* Result */}
+        {result && (
+          <div ref={resultRef} className="result-card" style={{ marginTop: 20 }}>
+
+            {/* Register card */}
+            <div className={`card${isExact ? " register-exact" : ""}`} style={{
+              borderColor: isExact ? "#00e5a055" : "#ffd16633",
+              marginBottom: 10,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                <div>
+                  <div className="section-title" style={{ marginBottom: 6 }}>בקופה</div>
+                  <div style={{
+                    fontSize: 34, fontWeight: 800, letterSpacing: "-1px", lineHeight: 1,
+                    color: isExact ? "#00e5a0" : "#ffd166",
+                  }}>
+                    {fmt(result.totalInRegister)}
                   </div>
                 </div>
-                {errors[`bill_${d}`] && <div className="err-msg">{errors[`bill_${d}`]}</div>}
+                <div style={{
+                  padding: "4px 11px", borderRadius: 20, marginTop: 2,
+                  background: isExact ? "#00e5a018" : "#ffd16618",
+                  border: `1px solid ${isExact ? "#00e5a040" : "#ffd16640"}`,
+                  fontSize: 11, fontWeight: 700, letterSpacing: ".5px",
+                  color: isExact ? "#00e5a0" : "#ffd166",
+                }}>
+                  {isExact ? "✓ מדויק" : "קירוב"}
+                </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
 
-      {totalInventory > 0 && (
-        <div style={{ padding: "10px 14px", fontSize: 13, color: "#888", display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-          <span>סה"כ מלאי:</span>
-          <span style={{ color: "#ccc" }}>{fmt(totalInventory)}</span>
-        </div>
-      )}
+              <div style={{ borderTop: "1px solid #181b28", paddingTop: 12 }}>
+                <div className="row" style={{ color: "#8890aa" }}>
+                  <span>מטבעות</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {result.coinsRemoved > 0 && result.type !== "coins_over" && (
+                      <span style={{ color: "#ff9a6c", fontSize: 12 }}>הוצא {fmt(result.coinsRemoved)}</span>
+                    )}
+                    <span style={{ fontWeight: 600, color: "#c0c8e0" }}>{fmt(result.coinsInRegister)}</span>
+                  </div>
+                </div>
 
-      <button className="btn" onClick={handleCalc}>חשב חלוקה אופטימלית</button>
-      <button
-        className="btn-report"
-        onClick={() => {
-          const newErrors = {};
-          if (simpleCoins) {
-            const e = validateSimpleCoins(simpleCoinsInput);
-            if (e) newErrors.simpleCoins = e;
-          } else {
-            COIN_KEYS.forEach(k => {
-              const e = validateCoinField(k, coinInputs[k], coinMode);
-              if (e) newErrors[`coin_${k}`] = e;
-            });
-          }
-          BILL_DENOMS.forEach(d => {
-            const e = validateBillField(d, billInputs[d], billMode);
-            if (e) newErrors[`bill_${d}`] = e;
-          });
-          if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
-          generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, billInputs, billMode });
-        }}
-      >
-        📊 הפק דוח ספירה
-      </button>
-
-      {result && (
-        <div ref={resultRef} className="result-card" style={{ marginTop: 24 }}>
-          {/* Register */}
-          <div className="card" style={{ borderColor: isExact ? "#00e5a0" : "#ffd166", marginBottom: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <span style={{ fontWeight: 700, color: isExact ? "#00e5a0" : "#ffd166", fontSize: 15 }}>🏪 בקופה</span>
-              <span style={{ fontSize: 22, fontWeight: 700, color: isExact ? "#00e5a0" : "#ffd166" }}>{fmt(result.totalInRegister)}</span>
-            </div>
-
-            <div className="row" style={{ color: "#ccc" }}>
-              <span>מטבעות</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {result.coinsRemoved > 0 && result.type !== "coins_over" && (
-                  <span style={{ color: "#ff9a6c", fontSize: 12 }}>הוצא {fmt(result.coinsRemoved)}</span>
+                {result.type === "coins_over" && (
+                  <div className="notice" style={{ background: "#1a0e0a", border: "1px solid #ff6b3540", color: "#ff9a6c" }}>
+                    ⚠️ המטבעות עולים על ₪1,000 — יש להוציא כ-{fmt(result.coinsRemoved)} מטבעות.
+                  </div>
                 )}
-                <span style={{ fontWeight: 600 }}>{fmt(result.coinsInRegister)}</span>
+
+                {BILL_DENOMS.map(d =>
+                  result.billsInRegister[d] > 0 ? (
+                    <div key={d} className="row" style={{ color: "#8890aa" }}>
+                      <span style={{ display: "flex", alignItems: "center" }}>
+                        <span className="pill" style={{
+                          background: d <= 50 ? "#0d2d1a" : "#1a1504",
+                          color: d <= 50 ? "#00e5a0" : "#ffd166",
+                          border: `1px solid ${d <= 50 ? "#00e5a033" : "#ffd16633"}`,
+                        }}>₪{d}</span>
+                        {result.billsInRegister[d]} שטרות
+                      </span>
+                      <span style={{ fontWeight: 600, color: "#c0c8e0" }}>{fmt(result.billsInRegister[d] * d)}</span>
+                    </div>
+                  ) : null
+                )}
+
+                {result.type === "exact_remove" && (
+                  <div className="notice" style={{ background: "#0d1a11", border: "1px solid #00e5a020", color: "#00b37d" }}>
+                    💡 יש להוציא {fmt(result.coinsRemoved)} מהמטבעות כדי להגיע בדיוק ל-₪1,000
+                  </div>
+                )}
+
+                {result.gap > 0 && (
+                  <div className="notice" style={{ background: "#1a140a", border: "1px solid #ffd16630", color: "#ffd166" }}>
+                    ⚠️ חסר {fmt(result.gap)} ל-₪1,000 — אין שטרות מתאימים להשלמה
+                  </div>
+                )}
               </div>
             </div>
 
-            {result.type === "coins_over" && (
-              <div className="notice" style={{ background: "#2a1a0a", border: "1px solid #ff6b35", color: "#ff9a6c" }}>
-                ⚠️ המטבעות עולים על ₪1,000 — יש להוציא כ-{fmt(result.coinsRemoved)} מטבעות.
-              </div>
-            )}
-
-            {BILL_DENOMS.map(d =>
-              result.billsInRegister[d] > 0 ? (
-                <div key={d} className="row" style={{ color: "#ccc" }}>
-                  <span>
-                    <span className="pill" style={{ background: d <= 50 ? "#0d2d1a" : "#1a1504", color: d <= 50 ? "#00e5a0" : "#ffd166", border: `1px solid ${d <= 50 ? "#00e5a044" : "#ffd16644"}` }}>₪{d}</span>
-                    {result.billsInRegister[d]} שטרות
-                  </span>
-                  <span style={{ fontWeight: 600 }}>{fmt(result.billsInRegister[d] * d)}</span>
+            {/* Envelope card */}
+            <div className="card" style={{ borderColor: "#181b28" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: envelopeTotal > 0 ? 16 : 0 }}>
+                <div>
+                  <div className="section-title" style={{ marginBottom: 6 }}>במעטפה</div>
+                  <div style={{
+                    fontSize: 22, fontWeight: 700,
+                    color: envelopeTotal > 0 ? "#8890aa" : "#2e3248",
+                  }}>
+                    {fmt(envelopeTotal)}
+                  </div>
                 </div>
-              ) : null
-            )}
-
-            {result.type === "exact_remove" && (
-              <div className="notice" style={{ background: "#0d1f18", border: "1px solid #00e5a033", color: "#00b37d" }}>
-                💡 יש להוציא {fmt(result.coinsRemoved)} מהמטבעות כדי להגיע בדיוק ל-₪1,000
               </div>
-            )}
 
-            {result.gap > 0 && (
-              <div className="notice" style={{ background: "#1a160a", border: "1px solid #ffd166", color: "#ffd166" }}>
-                ⚠️ חסר {fmt(result.gap)} ל-₪1,000 — אין שטרות מתאימים להשלמה
-              </div>
-            )}
-          </div>
+              {envelopeTotal > 0 && (
+                <div style={{ borderTop: "1px solid #181b28", paddingTop: 12 }}>
+                  {(result.type === "coins_over" || result.type === "exact_remove") && result.coinsRemoved > 0 && (
+                    <div className="row" style={{ color: "#4a5070" }}>
+                      <span>מטבעות להוצאה</span>
+                      <span style={{ fontWeight: 600, color: "#606880" }}>{fmt(result.coinsRemoved)}</span>
+                    </div>
+                  )}
 
-          {/* Envelope */}
-          <div className="card" style={{ borderColor: "#3a2d1a" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: envelopeTotal > 0 ? 14 : 0 }}>
-              <span style={{ fontWeight: 700, color: "#ffd166", fontSize: 15 }}>📬 במעטפה</span>
-              <span style={{ fontSize: 15, color: "#888" }}>{fmt(envelopeTotal)}</span>
+                  {BILL_DENOMS.map(d =>
+                    result.billsInEnvelope[d] > 0 ? (
+                      <div key={d} className="row" style={{ color: "#4a5070" }}>
+                        <span style={{ display: "flex", alignItems: "center" }}>
+                          <span className="pill" style={{ background: "#1a1504", color: "#ffd16660", border: "1px solid #ffd16620" }}>₪{d}</span>
+                          {result.billsInEnvelope[d]} שטרות
+                        </span>
+                        <span style={{ fontWeight: 600, color: "#606880" }}>{fmt(result.billsInEnvelope[d] * d)}</span>
+                      </div>
+                    ) : null
+                  )}
+                </div>
+              )}
+
+              {envelopeTotal === 0 && (
+                <div style={{ color: "#2e3248", fontSize: 13 }}>המעטפה ריקה — הכל בקופה</div>
+              )}
             </div>
 
-            {(result.type === "coins_over" || result.type === "exact_remove") && result.coinsRemoved > 0 && (
-              <div className="row" style={{ color: "#666" }}>
-                <span>מטבעות להוצאה</span>
-                <span style={{ fontWeight: 600, color: "#555" }}>{fmt(result.coinsRemoved)}</span>
-              </div>
-            )}
-
-            {BILL_DENOMS.map(d =>
-              result.billsInEnvelope[d] > 0 ? (
-                <div key={d} className="row" style={{ color: "#666" }}>
-                  <span>
-                    <span className="pill" style={{ background: "#1a1504", color: "#ffd16688", border: "1px solid #ffd16622" }}>₪{d}</span>
-                    {result.billsInEnvelope[d]} שטרות
-                  </span>
-                  <span style={{ fontWeight: 600, color: "#555" }}>{fmt(result.billsInEnvelope[d] * d)}</span>
-                </div>
-              ) : null
-            )}
-
-            {envelopeTotal === 0 && (
-              <div style={{ color: "#444", fontSize: 13 }}>המעטפה ריקה — הכל בקופה</div>
-            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
