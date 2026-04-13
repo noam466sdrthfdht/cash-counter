@@ -552,7 +552,7 @@ export default function CashCounter() {
           to   { background-position:  200% center; }
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; touch-action: manipulation; }
 
         .card {
           background: #13151e;
@@ -571,7 +571,7 @@ export default function CashCounter() {
           color: #d0d4e8;
           padding: 9px 11px;
           font-family: inherit;
-          font-size: 15px;
+          font-size: 16px;
           width: 100%;
           outline: none;
           transition: border-color .2s, background .2s;
@@ -739,6 +739,42 @@ export default function CashCounter() {
           opacity: .5;
           pointer-events: none;
         }
+
+        .inp-row {
+          display: flex;
+          gap: 5px;
+        }
+
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 18px;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .card-header-controls {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-shrink: 0;
+        }
+
+        @media (max-width: 430px) {
+          .card { padding: 16px 13px; }
+          .btn { min-height: 52px; font-size: 15px; }
+          .btn-report { min-height: 48px; }
+          .inp { padding: 10px 9px; min-height: 44px; }
+          .inp-row { flex-direction: column; gap: 7px; }
+          .denom-chip { margin-bottom: 4px; }
+          .sub-label { margin-bottom: 2px; }
+          .card-header { margin-bottom: 14px; }
+        }
+
+        @media (max-width: 360px) {
+          .card-header-controls { gap: 7px; }
+        }
       `}</style>
 
       <div className="dot-grid" />
@@ -785,9 +821,9 @@ export default function CashCounter() {
 
         {/* Coins card */}
         <div className="card anim-1" style={{ marginBottom: 10 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <div className="card-header">
             <span className="section-title">מטבעות</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="card-header-controls">
               {!simpleCoins && <ModeToggle mode={coinMode} onChange={handleCoinModeChange} />}
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <button
@@ -804,6 +840,7 @@ export default function CashCounter() {
               <input
                 className={`inp${errors.simpleCoins ? " err" : ""}`}
                 type="number"
+                inputMode="decimal"
                 value={simpleCoinsInput}
                 onChange={e => { setSimpleCoinsInput(e.target.value); setErrors(p => ({ ...p, simpleCoins: validateSimpleCoins(e.target.value) })); }}
                 placeholder={'סה"כ מטבעות (₪)'}
@@ -831,12 +868,13 @@ export default function CashCounter() {
                 return (
                   <div key={k}>
                     <div className="denom-chip coin">{COIN_LABELS[k]}</div>
-                    <div style={{ display: "flex", gap: 5 }}>
+                    <div className="inp-row">
                       <div style={{ flex: 1 }}>
                         <div className="sub-label">כמות</div>
                         <input
                           className={`inp${errors[`coin_${k}`] && coinMode === "number" ? " err" : ""}`}
                           type="number"
+                          inputMode="numeric"
                           value={numberDisplayVal}
                           readOnly={coinMode !== "number"}
                           onChange={coinMode === "number" ? e => {
@@ -853,6 +891,7 @@ export default function CashCounter() {
                         <input
                           className={`inp${errors[`coin_${k}`] && coinMode === "sum" ? " err" : ""}`}
                           type="number"
+                          inputMode="decimal"
                           value={sumDisplayVal}
                           readOnly={coinMode !== "sum"}
                           onChange={coinMode === "sum" ? e => {
@@ -875,7 +914,7 @@ export default function CashCounter() {
 
         {/* Bills card */}
         <div className="card anim-2" style={{ marginBottom: 20 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <div className="card-header">
             <span className="section-title">שטרות</span>
             <ModeToggle mode={billMode} onChange={handleBillModeChange} />
           </div>
@@ -896,12 +935,13 @@ export default function CashCounter() {
               return (
                 <div key={d}>
                   <div className="denom-chip bill">₪{d}</div>
-                  <div style={{ display: "flex", gap: 5 }}>
+                  <div className="inp-row">
                     <div style={{ flex: 1 }}>
                       <div className="sub-label">כמות</div>
                       <input
                         className={`inp${errors[`bill_${d}`] && billMode === "number" ? " err" : ""}`}
                         type="number"
+                        inputMode="numeric"
                         value={numberDisplayVal}
                         readOnly={billMode !== "number"}
                         onChange={billMode === "number" ? e => {
@@ -918,6 +958,7 @@ export default function CashCounter() {
                       <input
                         className={`inp${errors[`bill_${d}`] && billMode === "sum" ? " err" : ""}`}
                         type="number"
+                        inputMode="numeric"
                         value={sumDisplayVal}
                         readOnly={billMode !== "sum"}
                         onChange={billMode === "sum" ? e => {
