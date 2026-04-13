@@ -52,7 +52,7 @@ function backtrack(target, suffixDPs, billCounts) {
 }
 
 function solve(coinsTotal, billCounts) {
-  if (coinsTotal >= TARGET) {
+  if (coinsTotal > TARGET) {
     return {
       type: "coins_over",
       coinsInRegister: TARGET,
@@ -708,18 +708,36 @@ export default function CashCounter() {
             );
           })}
         </div>
-        {totalInventory > 0 && (
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #2a2d3a", fontSize: 13, color: "#888", display: "flex", justifyContent: "space-between" }}>
-            <span>סה"כ מלאי:</span>
-            <span style={{ color: "#ccc" }}>{fmt(totalInventory)}</span>
-          </div>
-        )}
       </div>
+
+      {totalInventory > 0 && (
+        <div style={{ padding: "10px 14px", fontSize: 13, color: "#888", display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+          <span>סה"כ מלאי:</span>
+          <span style={{ color: "#ccc" }}>{fmt(totalInventory)}</span>
+        </div>
+      )}
 
       <button className="btn" onClick={handleCalc}>חשב חלוקה אופטימלית</button>
       <button
         className="btn-report"
-        onClick={() => generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, billInputs, billMode })}
+        onClick={() => {
+          const newErrors = {};
+          if (simpleCoins) {
+            const e = validateSimpleCoins(simpleCoinsInput);
+            if (e) newErrors.simpleCoins = e;
+          } else {
+            COIN_KEYS.forEach(k => {
+              const e = validateCoinField(k, coinInputs[k], coinMode);
+              if (e) newErrors[`coin_${k}`] = e;
+            });
+          }
+          BILL_DENOMS.forEach(d => {
+            const e = validateBillField(d, billInputs[d], billMode);
+            if (e) newErrors[`bill_${d}`] = e;
+          });
+          if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+          generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, billInputs, billMode });
+        }}
       >
         📊 הפק דוח ספירה
       </button>
