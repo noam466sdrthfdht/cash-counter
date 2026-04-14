@@ -177,11 +177,9 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
   const MID = W / 2;
   const PAD = 18;
 
-  // White background
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, W, H);
 
-  // Header
   ctx.fillStyle = "#1a1d27";
   ctx.fillRect(0, 0, W, HEADER_H);
 
@@ -195,12 +193,10 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
   ctx.fillStyle = "#888";
   ctx.fillText(dateStr, W / 2, 62);
 
-  // Column header bg
   const chY = HEADER_H;
   ctx.fillStyle = "#f0f2f5";
   ctx.fillRect(0, chY, W, COL_HEADER_H);
 
-  // Borders
   ctx.strokeStyle = "#dee2e6";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -208,13 +204,11 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
   ctx.lineTo(W, chY + COL_HEADER_H);
   ctx.stroke();
 
-  // Center divider line (from col header to subtotals)
   ctx.beginPath();
   ctx.moveTo(MID, chY);
   ctx.lineTo(MID, HEADER_H + COL_HEADER_H + maxContentRows * ROW_H + SUBTOTALS_H);
   ctx.stroke();
 
-  // Column header labels
   ctx.font = 'bold 15px "Segoe UI", Arial, sans-serif';
   ctx.fillStyle = "#3b82f6";
   ctx.textAlign = "center";
@@ -223,7 +217,6 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
   ctx.fillStyle = "#d97706";
   ctx.fillText("שטרות", MID + MID / 2, chY + 25);
 
-  // Content rows
   let y = HEADER_H + COL_HEADER_H;
 
   const drawCell = (label, amount, colStart, colEnd, rowY) => {
@@ -247,7 +240,6 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
       ctx.fillRect(0, y, W, ROW_H);
     }
 
-    // Row separator
     ctx.strokeStyle = "#e5e7eb";
     ctx.lineWidth = 0.5;
     ctx.beginPath();
@@ -265,7 +257,6 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
     y += ROW_H;
   }
 
-  // Subtotals
   ctx.fillStyle = "#eff6ff";
   ctx.fillRect(0, y, MID, SUBTOTALS_H);
   ctx.fillStyle = "#fffbeb";
@@ -284,7 +275,6 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
   ctx.lineTo(W, y);
   ctx.stroke();
 
-  // Center divider in subtotals
   ctx.strokeStyle = "#dee2e6";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -312,7 +302,6 @@ function generateReport({ coinInputs, coinMode, simpleCoins, simpleCoinsInput, b
 
   y += SUBTOTALS_H;
 
-  // Grand total
   ctx.fillStyle = "#1a1d27";
   ctx.fillRect(0, y, W, GRAND_H);
 
@@ -345,7 +334,7 @@ export default function CashCounter() {
   const [billInputs, setBillInputs] = useState({ 20: "", 50: "", 100: "", 200: "" });
   const [result, setResult] = useState(null);
   const [errors, setErrors] = useState({});
-  const resultRef = useRef(null);
+  const registerRef = useRef(null);
 
   const computeCoinsTotal = () => {
     if (simpleCoins) return parseFloat(simpleCoinsInput) || 0;
@@ -364,6 +353,8 @@ export default function CashCounter() {
     }, 0);
 
   const totalInventory = Math.round((computeCoinsTotal() + computeBillsTotal()) * 100) / 100;
+  const displayCoinTotal = computeCoinsTotal();
+  const displayBillTotal = computeBillsTotal();
 
   const validateCoinField = (k, raw, mode) => {
     if (raw === "") return undefined;
@@ -435,7 +426,7 @@ export default function CashCounter() {
 
     setResult(solve(coinsTotalVal, billCounts));
     setTimeout(
-      () => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      () => registerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
       80
     );
   };
@@ -492,14 +483,14 @@ export default function CashCounter() {
     setErrors({});
   };
 
-  const ModeToggle = ({ mode, onChange }) => (
+  const ModeToggle = ({ mode, onChange, accent }) => (
     <div style={{
       display: "flex",
-      background: "#0b0d14",
-      border: "1px solid #1e2133",
+      background: "#080a14",
+      border: "1px solid #1c2038",
       borderRadius: 8,
       overflow: "hidden",
-      padding: 2,
+      padding: 3,
       gap: 2,
     }}>
       {["number", "sum"].map(m => (
@@ -507,20 +498,21 @@ export default function CashCounter() {
           key={m}
           onClick={() => onChange(m)}
           style={{
-            padding: "5px 13px",
+            padding: "5px 12px",
             border: "none",
             borderRadius: 6,
-            background: mode === m ? "#00e5a0" : "transparent",
-            color: mode === m ? "#0b0d14" : "#555",
+            background: mode === m ? (accent === "bill" ? "#f2b83b" : "#0fd690") : "transparent",
+            color: mode === m ? "#070810" : "#4a5070",
             fontFamily: "inherit",
             fontSize: 12,
             cursor: "pointer",
-            fontWeight: mode === m ? 700 : 400,
+            fontWeight: mode === m ? 700 : 500,
             transition: "all .2s",
             letterSpacing: ".3px",
+            whiteSpace: "nowrap",
           }}
         >
-          {m === "number" ? "מספר" : "סכום"}
+          {m === "number" ? "כמות" : "סכום"}
         </button>
       ))}
     </div>
@@ -529,138 +521,390 @@ export default function CashCounter() {
   return (
     <div dir="rtl" style={{
       minHeight: "100vh",
-      background: "#0b0d14",
-      color: "#d0d4e8",
+      background: "#060810",
+      color: "#c8cbdf",
       fontFamily: "'Heebo', sans-serif",
-      padding: "0 0 80px",
+      paddingBottom: 80,
     }}>
       <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes resultIn {
-          from { opacity: 0; transform: translateY(12px) scale(.99); }
-          to   { opacity: 1; transform: none; }
-        }
-        @keyframes glowPulse {
-          0%, 100% { box-shadow: 0 0 0px rgba(0,229,160,0); }
-          50%       { box-shadow: 0 0 28px rgba(0,229,160,.12); }
+        @keyframes resultSlide {
+          from { opacity: 0; transform: translateY(14px) scale(.995); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes shimmer {
           from { background-position: -200% center; }
           to   { background-position:  200% center; }
         }
-
-        *, *::before, *::after { box-sizing: border-box; touch-action: manipulation; }
-
-        .card {
-          background: #13151e;
-          border: 1px solid #1e2133;
-          border-radius: 16px;
-          padding: 22px;
+        @keyframes pulseGlow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(15,214,144,0); }
+          50%       { box-shadow: 0 0 32px 0 rgba(15,214,144,.1); }
         }
-        .anim-1 { animation: slideUp .45s cubic-bezier(.22,1,.36,1) .05s both; }
-        .anim-2 { animation: slideUp .45s cubic-bezier(.22,1,.36,1) .15s both; }
-        .anim-3 { animation: slideUp .45s cubic-bezier(.22,1,.36,1) .25s both; }
-
-        .inp {
-          background: #0e1020;
-          border: 1px solid #1e2133;
-          border-radius: 10px;
-          color: #d0d4e8;
-          padding: 9px 11px;
-          font-family: inherit;
-          font-size: 16px;
-          width: 100%;
-          outline: none;
-          transition: border-color .2s, background .2s;
-          -moz-appearance: textfield;
-        }
-        .inp::-webkit-outer-spin-button,
-        .inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .inp:focus { border-color: #00e5a0; background: #0b1a14; }
-        .inp.err { border-color: #ff6b35; }
-        .inp::placeholder { color: #282b3e; }
-        .inp[readonly] { opacity: .32; cursor: default; }
-
-        .err-msg { color: #ff9a6c; font-size: 12px; margin-top: 4px; }
-
-        .section-title {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 1.8px;
-          text-transform: uppercase;
-          color: #383c58;
+        @keyframes spinnerRotate {
+          to { transform: rotate(360deg); }
         }
 
-        .sub-label {
-          font-size: 10px;
-          color: #383c58;
-          margin-bottom: 3px;
-          letter-spacing: .6px;
-          text-transform: uppercase;
-          font-weight: 600;
+        *, *::before, *::after {
+          box-sizing: border-box;
+          touch-action: manipulation;
         }
 
-        .denom-chip {
-          display: inline-flex;
+        /* ── BG mesh ── */
+        .bg-mesh {
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background:
+            radial-gradient(ellipse 70% 50% at 20% 0%, rgba(15,214,144,.04) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 100%, rgba(242,184,59,.04) 0%, transparent 60%);
+        }
+        .bg-dots {
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background-image: radial-gradient(circle, #171a2a 1px, transparent 1px);
+          background-size: 24px 24px;
+          opacity: .45;
+        }
+
+        /* ── Sticky header ── */
+        .sticky-header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: rgba(6,8,16,.94);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid #141728;
+          padding: 0 20px;
+          height: 62px;
+          display: flex;
+          justify-content: space-between;
           align-items: center;
-          padding: 2px 9px;
-          border-radius: 5px;
-          font-size: 12px;
+          margin-bottom: 28px;
+        }
+        .header-logo {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+        }
+        .header-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #0fd690 0%, #00a870 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          flex-shrink: 0;
+          box-shadow: 0 0 0 1px rgba(15,214,144,.25), 0 4px 12px rgba(15,214,144,.15);
+        }
+        .header-title {
+          font-size: 15px;
           font-weight: 700;
+          color: #e0e3f5;
+          line-height: 1.1;
+          letter-spacing: -.2px;
+        }
+        .header-subtitle {
+          font-size: 11px;
+          color: #30334e;
+          margin-top: 2px;
+          font-weight: 500;
           letter-spacing: .3px;
-          margin-bottom: 8px;
         }
-        .denom-chip.coin {
-          background: #0a1f16;
-          border: 1px solid #00e5a022;
-          color: #00e5a0;
+        .header-total-block {
+          text-align: left;
+          min-width: 90px;
         }
-        .denom-chip.bill {
-          background: #1a1504;
-          border: 1px solid #ffd16622;
-          color: #ffd166;
-        }
-
-        .btn {
-          width: 100%;
-          padding: 15px;
-          border: none;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #00e5a0, #00b37d);
-          color: #0b0d14;
-          font-size: 16px;
-          font-family: inherit;
+        .header-total-label {
+          font-size: 10px;
           font-weight: 700;
-          cursor: pointer;
-          letter-spacing: .5px;
-          transition: filter .15s, transform .1s;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: #30334e;
+          margin-bottom: 2px;
+        }
+        .header-total-amount {
+          font-size: 20px;
+          font-weight: 800;
+          line-height: 1;
+          letter-spacing: -.5px;
+          transition: color .3s;
+          font-variant-numeric: tabular-nums;
+        }
+        .header-total-amount.has-value { color: #0fd690; }
+        .header-total-amount.no-value  { color: #252840; }
+
+        /* ── Cards ── */
+        .card {
+          background: #0c0f1c;
+          border: 1px solid #181b2c;
+          border-radius: 18px;
+          padding: 22px 20px;
           position: relative;
           overflow: hidden;
         }
-        .btn::after {
+        .card::before {
+          content: '';
+          position: absolute;
+          top: 0; right: 0; left: 0;
+          height: 2px;
+          border-radius: 18px 18px 0 0;
+        }
+        .card-coins::before  { background: linear-gradient(90deg, #0fd690, rgba(15,214,144,0)); }
+        .card-bills::before  { background: linear-gradient(90deg, #f2b83b, rgba(242,184,59,0)); }
+        .card-register::before { background: linear-gradient(90deg, #0fd690, rgba(15,214,144,0)); }
+        .card-register-approx::before { background: linear-gradient(90deg, #f2b83b, rgba(242,184,59,0)); }
+        .card-envelope::before { background: linear-gradient(90deg, #252840, transparent); }
+
+        .anim-1 { animation: fadeUp .5s cubic-bezier(.22,1,.36,1) .05s both; }
+        .anim-2 { animation: fadeUp .5s cubic-bezier(.22,1,.36,1) .15s both; }
+        .anim-3 { animation: fadeUp .5s cubic-bezier(.22,1,.36,1) .25s both; }
+        .result-anim { animation: resultSlide .4s cubic-bezier(.22,1,.36,1) both; }
+
+        /* ── Card header ── */
+        .card-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .card-head-left {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+        }
+        .section-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: .5px;
+          color: #e0e3f5;
+        }
+        .section-badge-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+        .dot-coin { background: #0fd690; box-shadow: 0 0 6px rgba(15,214,144,.6); }
+        .dot-bill { background: #f2b83b; box-shadow: 0 0 6px rgba(242,184,59,.6); }
+        .card-head-controls {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-shrink: 0;
+        }
+
+        /* ── Switch ── */
+        .sw-wrap {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+        .sw-track {
+          width: 34px;
+          height: 19px;
+          background: #1a1d2e;
+          border-radius: 10px;
+          position: relative;
+          cursor: pointer;
+          border: 1px solid #252840;
+          flex-shrink: 0;
+          transition: background .2s, border-color .2s;
+          padding: 0;
+        }
+        .sw-track::after {
+          content: '';
+          position: absolute;
+          width: 13px;
+          height: 13px;
+          background: #3a3e58;
+          border-radius: 50%;
+          top: 2px;
+          right: 2px;
+          transition: right .2s, background .2s;
+        }
+        .sw-track.on {
+          background: rgba(15,214,144,.2);
+          border-color: rgba(15,214,144,.4);
+        }
+        .sw-track.on::after {
+          right: 17px;
+          background: #0fd690;
+        }
+        .sw-label {
+          font-size: 11px;
+          font-weight: 600;
+          color: #353852;
+          letter-spacing: .4px;
+          text-transform: uppercase;
+        }
+
+        /* ── Inputs ── */
+        .inp {
+          background: #090b18;
+          border: 1px solid #1a1d2e;
+          border-radius: 10px;
+          color: #d8daf0;
+          padding: 10px 12px;
+          font-family: inherit;
+          font-size: 15px;
+          width: 100%;
+          outline: none;
+          transition: border-color .2s, background .2s, box-shadow .2s;
+          -moz-appearance: textfield;
+          font-variant-numeric: tabular-nums;
+        }
+        .inp::-webkit-outer-spin-button,
+        .inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .inp:focus {
+          border-color: #0fd690;
+          background: #080f0d;
+          box-shadow: 0 0 0 3px rgba(15,214,144,.06);
+        }
+        .inp.bill-focus:focus {
+          border-color: #f2b83b;
+          background: #0f0d07;
+          box-shadow: 0 0 0 3px rgba(242,184,59,.06);
+        }
+        .inp.err {
+          border-color: #f05252;
+          box-shadow: 0 0 0 3px rgba(240,82,82,.06);
+        }
+        .inp::placeholder { color: #1e2235; }
+        .inp[readonly] { opacity: .28; cursor: default; pointer-events: none; }
+
+        /* ── Sub labels ── */
+        .sub-label {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          color: #2e3252;
+          margin-bottom: 5px;
+        }
+
+        /* ── Denom chips ── */
+        .denom-chip {
+          display: inline-flex;
+          align-items: center;
+          padding: 3px 9px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: .3px;
+          margin-bottom: 9px;
+          font-variant-numeric: tabular-nums;
+        }
+        .chip-coin {
+          background: rgba(15,214,144,.08);
+          border: 1px solid rgba(15,214,144,.18);
+          color: #0fd690;
+        }
+        .chip-bill {
+          background: rgba(242,184,59,.08);
+          border: 1px solid rgba(242,184,59,.18);
+          color: #f2b83b;
+        }
+
+        /* ── Grid ── */
+        .inp-row { display: flex; gap: 8px; }
+        .grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+
+        /* ── Error msg ── */
+        .err-msg {
+          color: #f08080;
+          font-size: 11px;
+          margin-top: 5px;
+          font-weight: 500;
+        }
+
+        /* ── Section total row ── */
+        .section-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 18px;
+          padding-top: 14px;
+          border-top: 1px solid #14172a;
+        }
+        .section-total-label {
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: .8px;
+          text-transform: uppercase;
+          color: #353858;
+        }
+        .section-total-amount {
+          font-size: 16px;
+          font-weight: 800;
+          letter-spacing: -.3px;
+          font-variant-numeric: tabular-nums;
+        }
+        .coin-total-amount { color: #0fd690; }
+        .bill-total-amount { color: #f2b83b; }
+
+        /* ── Calculate button ── */
+        .btn-calc {
+          width: 100%;
+          padding: 16px;
+          border: none;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #0fd690 0%, #00a870 100%);
+          color: #050810;
+          font-size: 15px;
+          font-family: inherit;
+          font-weight: 800;
+          cursor: pointer;
+          letter-spacing: .5px;
+          transition: filter .15s, transform .1s, box-shadow .2s;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(15,214,144,.2), 0 1px 4px rgba(0,0,0,.3);
+        }
+        .btn-calc::after {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.18) 50%, transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.22) 50%, transparent 100%);
           background-size: 200% auto;
           opacity: 0;
           transition: opacity .25s;
         }
-        .btn:hover::after { opacity: 1; animation: shimmer 1.1s linear infinite; }
-        .btn:hover { filter: brightness(1.07); }
-        .btn:active { transform: scale(.98); }
+        .btn-calc:hover::after { opacity: 1; animation: shimmer 1.1s linear infinite; }
+        .btn-calc:hover {
+          filter: brightness(1.08);
+          box-shadow: 0 6px 28px rgba(15,214,144,.3), 0 2px 6px rgba(0,0,0,.3);
+        }
+        .btn-calc:active { transform: scale(.98); }
 
+        /* ── Report button ── */
         .btn-report {
           width: 100%;
           padding: 13px;
-          border: 1px solid #1e2133;
-          border-radius: 12px;
+          border: 1px solid #1c2038;
+          border-radius: 14px;
           background: transparent;
-          color: #555;
-          font-size: 14px;
+          color: #353858;
+          font-size: 13px;
           font-family: inherit;
           font-weight: 600;
           cursor: pointer;
@@ -668,169 +912,196 @@ export default function CashCounter() {
           margin-top: 10px;
           letter-spacing: .3px;
         }
-        .btn-report:hover { border-color: #00e5a033; color: #00e5a0; background: #0d1f1855; }
+        .btn-report:hover {
+          border-color: rgba(15,214,144,.25);
+          color: #0fd690;
+          background: rgba(15,214,144,.04);
+        }
         .btn-report:active { transform: scale(.98); }
 
-        .pill {
-          display: inline-block;
-          border-radius: 6px;
-          padding: 2px 8px;
-          font-size: 12px;
+        /* ── Result section ── */
+        .result-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 18px;
+        }
+        .result-label {
+          font-size: 10px;
           font-weight: 700;
-          margin-left: 6px;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: #2e3252;
+          margin-bottom: 8px;
+        }
+        .result-amount {
+          font-size: 36px;
+          font-weight: 900;
+          letter-spacing: -1.5px;
+          line-height: 1;
+          font-variant-numeric: tabular-nums;
+        }
+        .amount-exact   { color: #0fd690; }
+        .amount-approx  { color: #f2b83b; }
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 5px 12px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: .5px;
+          margin-top: 3px;
+          flex-shrink: 0;
+        }
+        .badge-exact {
+          background: rgba(15,214,144,.1);
+          border: 1px solid rgba(15,214,144,.3);
+          color: #0fd690;
+        }
+        .badge-approx {
+          background: rgba(242,184,59,.1);
+          border: 1px solid rgba(242,184,59,.3);
+          color: #f2b83b;
         }
 
-        .result-card { animation: resultIn .38s cubic-bezier(.22,1,.36,1) both; }
-
-        .row {
+        /* ── Result rows ── */
+        .result-divider {
+          height: 1px;
+          background: #14172a;
+          margin: 14px 0;
+        }
+        .res-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 8px 0;
-          border-bottom: 1px solid #181b28;
           font-size: 14px;
+          border-bottom: 1px solid #0e1020;
         }
-        .row:last-child { border-bottom: none; }
+        .res-row:last-child { border-bottom: none; }
+        .res-row-label { color: #4a5070; font-weight: 500; }
+        .res-row-value { font-weight: 700; color: #9aa0c0; font-variant-numeric: tabular-nums; }
 
+        /* ── Denomination pill ── */
+        .denom-pill {
+          display: inline-flex;
+          align-items: center;
+          padding: 1px 8px;
+          border-radius: 5px;
+          font-size: 11px;
+          font-weight: 700;
+          margin-left: 7px;
+          font-variant-numeric: tabular-nums;
+        }
+        .pill-coin-reg {
+          background: rgba(15,214,144,.08);
+          border: 1px solid rgba(15,214,144,.2);
+          color: #0fd690;
+        }
+        .pill-bill-reg {
+          background: rgba(242,184,59,.08);
+          border: 1px solid rgba(242,184,59,.2);
+          color: #f2b83b;
+        }
+        .pill-env {
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
+          color: #3a3e58;
+        }
+
+        /* ── Notices ── */
         .notice {
           border-radius: 10px;
-          padding: 10px 14px;
+          padding: 11px 14px;
           font-size: 13px;
           margin-top: 12px;
           line-height: 1.55;
+          font-weight: 500;
+        }
+        .notice-warn {
+          background: rgba(240,82,82,.06);
+          border: 1px solid rgba(240,82,82,.2);
+          color: #f08080;
+        }
+        .notice-info {
+          background: rgba(15,214,144,.06);
+          border: 1px solid rgba(15,214,144,.18);
+          color: #0fd690;
+        }
+        .notice-gap {
+          background: rgba(242,184,59,.06);
+          border: 1px solid rgba(242,184,59,.2);
+          color: #d4a030;
         }
 
-        .sw-track {
-          width: 36px;
-          height: 20px;
-          background: #1e2133;
-          border-radius: 10px;
-          position: relative;
-          cursor: pointer;
-          border: none;
-          flex-shrink: 0;
-          transition: background .2s;
-        }
-        .sw-track.on { background: #00e5a0; }
-        .sw-track::after {
-          content: '';
-          position: absolute;
-          width: 14px;
-          height: 14px;
-          background: white;
-          border-radius: 50%;
-          top: 3px;
-          right: 3px;
-          transition: right .2s;
-        }
-        .sw-track.on::after { right: 19px; }
-
-        .register-exact {
-          border-color: #00e5a055 !important;
-          animation: glowPulse 2.8s ease-in-out infinite;
+        /* ── Glow on exact register ── */
+        .register-glow {
+          animation: pulseGlow 3s ease-in-out infinite;
         }
 
-        .dot-grid {
-          position: fixed;
-          inset: 0;
-          z-index: 0;
-          background-image: radial-gradient(circle, #1c1f30 1px, transparent 1px);
-          background-size: 28px 28px;
-          opacity: .5;
-          pointer-events: none;
-        }
-
-        .inp-row {
-          display: flex;
-          gap: 5px;
-        }
-
-        .card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 18px;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .card-header-controls {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-shrink: 0;
+        /* ── Scroll margin for sticky header ── */
+        .scroll-target {
+          scroll-margin-top: 76px;
         }
 
         @media (max-width: 430px) {
-          .card { padding: 16px 13px; }
-          .btn { min-height: 52px; font-size: 15px; }
+          .card { padding: 18px 15px; }
+          .btn-calc { padding: 15px; font-size: 15px; min-height: 52px; }
           .btn-report { min-height: 48px; }
-          .inp { padding: 10px 9px; min-height: 44px; }
-          .inp-row { flex-direction: column; gap: 7px; }
-          .denom-chip { margin-bottom: 4px; }
-          .sub-label { margin-bottom: 2px; }
-          .card-header { margin-bottom: 14px; }
+          .inp { padding: 10px 10px; min-height: 44px; font-size: 14px; }
+          .inp-row { flex-direction: column; gap: 8px; }
+          .result-amount { font-size: 30px; }
+          .card-head { margin-bottom: 16px; }
+          .grid-2 { gap: 12px; }
         }
 
         @media (max-width: 360px) {
-          .card-header-controls { gap: 7px; }
+          .card-head-controls { gap: 7px; }
+          .sticky-header { padding: 0 14px; }
         }
       `}</style>
 
-      <div className="dot-grid" />
+      <div className="bg-dots" />
+      <div className="bg-mesh" />
 
-      {/* Sticky header */}
-      <div style={{
-        position: "sticky", top: 0, zIndex: 50,
-        background: "rgba(11,13,20,.88)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        borderBottom: "1px solid #1a1d2e",
-        padding: "12px 20px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 24,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 9,
-            background: "linear-gradient(135deg, #00e5a0, #00b37d)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 17, flexShrink: 0,
-          }}>💰</div>
+      {/* ── Sticky header ── */}
+      <header className="sticky-header">
+        <div className="header-logo">
+          <div className="header-icon">💰</div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#e0e4f0", lineHeight: 1.1 }}>ספירת קופה</div>
-            <div style={{ fontSize: 11, color: "#383c58", marginTop: 1, fontWeight: 500 }}>יעד: ₪1,000 בקופה</div>
+            <div className="header-title">ספירת קופה</div>
+            <div className="header-subtitle">יעד: ₪1,000 בקופה</div>
           </div>
         </div>
-        {totalInventory > 0 && (
-          <div style={{ textAlign: "left" }}>
-            <div style={{ fontSize: 10, color: "#383c58", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase" }}>מלאי</div>
-            <div style={{
-              fontSize: 19, fontWeight: 800, lineHeight: 1.1,
-              color: totalInventory >= 1000 ? "#00e5a0" : "#e0e4f0",
-            }}>
-              {fmt(totalInventory)}
-            </div>
+        <div className="header-total-block">
+          <div className="header-total-label">מלאי</div>
+          <div className={`header-total-amount ${totalInventory > 0 ? "has-value" : "no-value"}`}>
+            {fmt(totalInventory)}
           </div>
-        )}
-      </div>
+        </div>
+      </header>
 
-      <div style={{ maxWidth: 500, margin: "0 auto", padding: "0 16px", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "0 16px", position: "relative", zIndex: 1 }}>
 
-        {/* Coins card */}
-        <div className="card anim-1" style={{ marginBottom: 10 }}>
-          <div className="card-header">
-            <span className="section-title">מטבעות</span>
-            <div className="card-header-controls">
-              {!simpleCoins && <ModeToggle mode={coinMode} onChange={handleCoinModeChange} />}
-              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        {/* ── Coins card ── */}
+        <div className="card card-coins anim-1" style={{ marginBottom: 12 }}>
+          <div className="card-head">
+            <div className="card-head-left">
+              <span className="section-badge">
+                <span className="section-badge-dot dot-coin" />
+                מטבעות
+              </span>
+            </div>
+            <div className="card-head-controls">
+              {!simpleCoins && <ModeToggle mode={coinMode} onChange={handleCoinModeChange} accent="coin" />}
+              <div className="sw-wrap">
                 <button
                   className={`sw-track${simpleCoins ? " on" : ""}`}
                   onClick={() => { setSimpleCoins(s => !s); setErrors({}); setResult(null); }}
                 />
-                <span style={{ fontSize: 11, color: "#383c58", fontWeight: 600 }}>פשוט</span>
+                <span className="sw-label">פשוט</span>
               </div>
             </div>
           </div>
@@ -842,7 +1113,10 @@ export default function CashCounter() {
                 type="number"
                 inputMode="decimal"
                 value={simpleCoinsInput}
-                onChange={e => { setSimpleCoinsInput(e.target.value); setErrors(p => ({ ...p, simpleCoins: validateSimpleCoins(e.target.value) })); }}
+                onChange={e => {
+                  setSimpleCoinsInput(e.target.value);
+                  setErrors(p => ({ ...p, simpleCoins: validateSimpleCoins(e.target.value) }));
+                }}
                 placeholder={'סה"כ מטבעות (₪)'}
                 step="0.1"
                 min="0"
@@ -850,7 +1124,7 @@ export default function CashCounter() {
               {errors.simpleCoins && <div className="err-msg">{errors.simpleCoins}</div>}
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="grid-2">
               {COIN_KEYS.map(k => {
                 const denom = COIN_VALUES[k];
                 const rawVal = coinInputs[k];
@@ -867,7 +1141,7 @@ export default function CashCounter() {
                 }
                 return (
                   <div key={k}>
-                    <div className="denom-chip coin">{COIN_LABELS[k]}</div>
+                    <div className="denom-chip chip-coin">{COIN_LABELS[k]}</div>
                     <div className="inp-row">
                       <div style={{ flex: 1 }}>
                         <div className="sub-label">כמות</div>
@@ -910,15 +1184,29 @@ export default function CashCounter() {
               })}
             </div>
           )}
+
+          {/* Coin total — only non-simple mode */}
+          {!simpleCoins && displayCoinTotal > 0 && (
+            <div className="section-total">
+              <span className="section-total-label">סה"כ מטבעות</span>
+              <span className="section-total-amount coin-total-amount">{fmt(displayCoinTotal)}</span>
+            </div>
+          )}
         </div>
 
-        {/* Bills card */}
-        <div className="card anim-2" style={{ marginBottom: 20 }}>
-          <div className="card-header">
-            <span className="section-title">שטרות</span>
-            <ModeToggle mode={billMode} onChange={handleBillModeChange} />
+        {/* ── Bills card ── */}
+        <div className="card card-bills anim-2" style={{ marginBottom: 20 }}>
+          <div className="card-head">
+            <div className="card-head-left">
+              <span className="section-badge">
+                <span className="section-badge-dot dot-bill" />
+                שטרות
+              </span>
+            </div>
+            <ModeToggle mode={billMode} onChange={handleBillModeChange} accent="bill" />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+
+          <div className="grid-2">
             {BILL_DENOMS.map(d => {
               const rawVal = billInputs[d];
               let numberDisplayVal, sumDisplayVal;
@@ -934,12 +1222,12 @@ export default function CashCounter() {
               }
               return (
                 <div key={d}>
-                  <div className="denom-chip bill">₪{d}</div>
+                  <div className="denom-chip chip-bill">₪{d}</div>
                   <div className="inp-row">
                     <div style={{ flex: 1 }}>
                       <div className="sub-label">כמות</div>
                       <input
-                        className={`inp${errors[`bill_${d}`] && billMode === "number" ? " err" : ""}`}
+                        className={`inp bill-focus${errors[`bill_${d}`] && billMode === "number" ? " err" : ""}`}
                         type="number"
                         inputMode="numeric"
                         value={numberDisplayVal}
@@ -956,7 +1244,7 @@ export default function CashCounter() {
                     <div style={{ flex: 1 }}>
                       <div className="sub-label">סכום ₪</div>
                       <input
-                        className={`inp${errors[`bill_${d}`] && billMode === "sum" ? " err" : ""}`}
+                        className={`inp bill-focus${errors[`bill_${d}`] && billMode === "sum" ? " err" : ""}`}
                         type="number"
                         inputMode="numeric"
                         value={sumDisplayVal}
@@ -976,11 +1264,21 @@ export default function CashCounter() {
               );
             })}
           </div>
+
+          {/* Bills total */}
+          {displayBillTotal > 0 && (
+            <div className="section-total">
+              <span className="section-total-label">סה"כ שטרות</span>
+              <span className="section-total-amount bill-total-amount">{fmt(displayBillTotal)}</span>
+            </div>
+          )}
         </div>
 
-        {/* Actions */}
+        {/* ── Actions ── */}
         <div className="anim-3">
-          <button className="btn" onClick={handleCalc}>חשב חלוקה אופטימלית</button>
+          <button className="btn-calc" onClick={handleCalc}>
+            חשב חלוקה אופטימלית
+          </button>
           <button
             className="btn-report"
             onClick={() => {
@@ -1006,77 +1304,69 @@ export default function CashCounter() {
           </button>
         </div>
 
-        {/* Result */}
+        {/* ── Result ── */}
         {result && (
-          <div ref={resultRef} className="result-card" style={{ marginTop: 20 }}>
+          <div style={{ marginTop: 24 }}>
 
             {/* Register card */}
-            <div className={`card${isExact ? " register-exact" : ""}`} style={{
-              borderColor: isExact ? "#00e5a055" : "#ffd16633",
-              marginBottom: 10,
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+            <div
+              ref={registerRef}
+              className={`card result-anim scroll-target ${isExact ? "card-register register-glow" : "card-register-approx"}`}
+              style={{ marginBottom: 10, borderColor: isExact ? "rgba(15,214,144,.2)" : "rgba(242,184,59,.18)" }}
+            >
+              <div className="result-header">
                 <div>
-                  <div className="section-title" style={{ marginBottom: 6 }}>בקופה</div>
-                  <div style={{
-                    fontSize: 34, fontWeight: 800, letterSpacing: "-1px", lineHeight: 1,
-                    color: isExact ? "#00e5a0" : "#ffd166",
-                  }}>
+                  <div className="result-label">בקופה</div>
+                  <div className={`result-amount ${isExact ? "amount-exact" : "amount-approx"}`}>
                     {fmt(result.totalInRegister)}
                   </div>
                 </div>
-                <div style={{
-                  padding: "4px 11px", borderRadius: 20, marginTop: 2,
-                  background: isExact ? "#00e5a018" : "#ffd16618",
-                  border: `1px solid ${isExact ? "#00e5a040" : "#ffd16640"}`,
-                  fontSize: 11, fontWeight: 700, letterSpacing: ".5px",
-                  color: isExact ? "#00e5a0" : "#ffd166",
-                }}>
+                <div className={`status-badge ${isExact ? "badge-exact" : "badge-approx"}`}>
                   {isExact ? "✓ מדויק" : "קירוב"}
                 </div>
               </div>
 
-              <div style={{ borderTop: "1px solid #181b28", paddingTop: 12 }}>
-                <div className="row" style={{ color: "#8890aa" }}>
-                  <span>מטבעות</span>
+              <div className="result-divider" />
+
+              <div>
+                <div className="res-row">
+                  <span className="res-row-label">מטבעות</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {result.coinsRemoved > 0 && result.type !== "coins_over" && (
-                      <span style={{ color: "#ff9a6c", fontSize: 12 }}>הוצא {fmt(result.coinsRemoved)}</span>
+                      <span style={{ color: "#f08080", fontSize: 12, fontWeight: 600 }}>
+                        הוצא {fmt(result.coinsRemoved)}
+                      </span>
                     )}
-                    <span style={{ fontWeight: 600, color: "#c0c8e0" }}>{fmt(result.coinsInRegister)}</span>
+                    <span className="res-row-value" style={{ color: "#bcc0d8" }}>{fmt(result.coinsInRegister)}</span>
                   </div>
                 </div>
 
                 {result.type === "coins_over" && (
-                  <div className="notice" style={{ background: "#1a0e0a", border: "1px solid #ff6b3540", color: "#ff9a6c" }}>
+                  <div className="notice notice-warn">
                     ⚠️ המטבעות עולים על ₪1,000 — יש להוציא כ-{fmt(result.coinsRemoved)} מטבעות.
                   </div>
                 )}
 
                 {BILL_DENOMS.map(d =>
                   result.billsInRegister[d] > 0 ? (
-                    <div key={d} className="row" style={{ color: "#8890aa" }}>
-                      <span style={{ display: "flex", alignItems: "center" }}>
-                        <span className="pill" style={{
-                          background: d <= 50 ? "#0d2d1a" : "#1a1504",
-                          color: d <= 50 ? "#00e5a0" : "#ffd166",
-                          border: `1px solid ${d <= 50 ? "#00e5a033" : "#ffd16633"}`,
-                        }}>₪{d}</span>
+                    <div key={d} className="res-row">
+                      <span className="res-row-label" style={{ display: "flex", alignItems: "center" }}>
+                        <span className={`denom-pill ${d <= 50 ? "pill-coin-reg" : "pill-bill-reg"}`}>₪{d}</span>
                         {result.billsInRegister[d]} שטרות
                       </span>
-                      <span style={{ fontWeight: 600, color: "#c0c8e0" }}>{fmt(result.billsInRegister[d] * d)}</span>
+                      <span className="res-row-value">{fmt(result.billsInRegister[d] * d)}</span>
                     </div>
                   ) : null
                 )}
 
                 {result.type === "exact_remove" && (
-                  <div className="notice" style={{ background: "#0d1a11", border: "1px solid #00e5a020", color: "#00b37d" }}>
+                  <div className="notice notice-info">
                     💡 יש להוציא {fmt(result.coinsRemoved)} מהמטבעות כדי להגיע בדיוק ל-₪1,000
                   </div>
                 )}
 
                 {result.gap > 0 && (
-                  <div className="notice" style={{ background: "#1a140a", border: "1px solid #ffd16630", color: "#ffd166" }}>
+                  <div className="notice notice-gap">
                     ⚠️ חסר {fmt(result.gap)} ל-₪1,000 — אין שטרות מתאימים להשלמה
                   </div>
                 )}
@@ -1084,13 +1374,16 @@ export default function CashCounter() {
             </div>
 
             {/* Envelope card */}
-            <div className="card" style={{ borderColor: "#181b28" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: envelopeTotal > 0 ? 16 : 0 }}>
+            <div className="card card-envelope result-anim" style={{ animationDelay: ".08s", borderColor: "#141728" }}>
+              <div className="result-header" style={{ marginBottom: envelopeTotal > 0 ? 0 : 0 }}>
                 <div>
-                  <div className="section-title" style={{ marginBottom: 6 }}>במעטפה</div>
+                  <div className="result-label">במעטפה</div>
                   <div style={{
-                    fontSize: 22, fontWeight: 700,
-                    color: envelopeTotal > 0 ? "#8890aa" : "#2e3248",
+                    fontSize: 22,
+                    fontWeight: 800,
+                    letterSpacing: "-.5px",
+                    color: envelopeTotal > 0 ? "#4a5070" : "#1e2235",
+                    fontVariantNumeric: "tabular-nums",
                   }}>
                     {fmt(envelopeTotal)}
                   </div>
@@ -1098,35 +1391,40 @@ export default function CashCounter() {
               </div>
 
               {envelopeTotal > 0 && (
-                <div style={{ borderTop: "1px solid #181b28", paddingTop: 12 }}>
-                  {(result.type === "coins_over" || result.type === "exact_remove") && result.coinsRemoved > 0 && (
-                    <div className="row" style={{ color: "#4a5070" }}>
-                      <span>מטבעות להוצאה</span>
-                      <span style={{ fontWeight: 600, color: "#606880" }}>{fmt(result.coinsRemoved)}</span>
-                    </div>
-                  )}
-
-                  {BILL_DENOMS.map(d =>
-                    result.billsInEnvelope[d] > 0 ? (
-                      <div key={d} className="row" style={{ color: "#4a5070" }}>
-                        <span style={{ display: "flex", alignItems: "center" }}>
-                          <span className="pill" style={{ background: "#1a1504", color: "#ffd16660", border: "1px solid #ffd16620" }}>₪{d}</span>
-                          {result.billsInEnvelope[d]} שטרות
-                        </span>
-                        <span style={{ fontWeight: 600, color: "#606880" }}>{fmt(result.billsInEnvelope[d] * d)}</span>
+                <>
+                  <div className="result-divider" />
+                  <div>
+                    {(result.type === "coins_over" || result.type === "exact_remove") && result.coinsRemoved > 0 && (
+                      <div className="res-row" style={{ opacity: .6 }}>
+                        <span className="res-row-label">מטבעות להוצאה</span>
+                        <span className="res-row-value">{fmt(result.coinsRemoved)}</span>
                       </div>
-                    ) : null
-                  )}
-                </div>
+                    )}
+                    {BILL_DENOMS.map(d =>
+                      result.billsInEnvelope[d] > 0 ? (
+                        <div key={d} className="res-row" style={{ opacity: .6 }}>
+                          <span className="res-row-label" style={{ display: "flex", alignItems: "center" }}>
+                            <span className="denom-pill pill-env">₪{d}</span>
+                            {result.billsInEnvelope[d]} שטרות
+                          </span>
+                          <span className="res-row-value">{fmt(result.billsInEnvelope[d] * d)}</span>
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+                </>
               )}
 
               {envelopeTotal === 0 && (
-                <div style={{ color: "#2e3248", fontSize: 13 }}>המעטפה ריקה — הכל בקופה</div>
+                <div style={{ color: "#1e2235", fontSize: 13, marginTop: 6, fontWeight: 500 }}>
+                  המעטפה ריקה — הכל בקופה
+                </div>
               )}
             </div>
 
           </div>
         )}
+
       </div>
     </div>
   );
