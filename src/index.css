@@ -53,12 +53,10 @@
 body {
   margin: 0;
   overflow-x: hidden;
-  background: #F7F5F1;
 }
 
 html {
   overflow-x: hidden;
-  background: #F7F5F1;
 }
 
 #root {
