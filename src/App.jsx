@@ -486,9 +486,9 @@ export default function CashCounter() {
   const ModeToggle = ({ mode, onChange, accent }) => (
     <div style={{
       display: "flex",
-      background: "#080a14",
-      border: "1px solid #1c2038",
-      borderRadius: 8,
+      background: "#F3F4F6",
+      border: "1.5px solid #E5E7EB",
+      borderRadius: 10,
       overflow: "hidden",
       padding: 3,
       gap: 2,
@@ -498,18 +498,19 @@ export default function CashCounter() {
           key={m}
           onClick={() => onChange(m)}
           style={{
-            padding: "5px 12px",
+            padding: "5px 13px",
             border: "none",
-            borderRadius: 6,
-            background: mode === m ? (accent === "bill" ? "#f2b83b" : "#0fd690") : "transparent",
-            color: mode === m ? "#070810" : "#4a5070",
+            borderRadius: 7,
+            background: mode === m ? (accent === "bill" ? "#F59E0B" : "#10B981") : "transparent",
+            color: mode === m ? "#FFFFFF" : "#9CA3AF",
             fontFamily: "inherit",
             fontSize: 12,
             cursor: "pointer",
-            fontWeight: mode === m ? 700 : 500,
+            fontWeight: mode === m ? 700 : 600,
             transition: "all .2s",
             letterSpacing: ".3px",
             whiteSpace: "nowrap",
+            boxShadow: mode === m ? "0 1px 4px rgba(0,0,0,.12)" : "none",
           }}
         >
           {m === "number" ? "כמות" : "סכום"}
@@ -521,8 +522,8 @@ export default function CashCounter() {
   return (
     <div dir="rtl" style={{
       minHeight: "100vh",
-      background: "#060810",
-      color: "#c8cbdf",
+      background: "#F7F5F1",
+      color: "#374151",
       fontFamily: "'Heebo', sans-serif",
       paddingBottom: 80,
     }}>
@@ -530,11 +531,11 @@ export default function CashCounter() {
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
 
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(16px); }
+          from { opacity: 0; transform: translateY(20px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes resultSlide {
-          from { opacity: 0; transform: translateY(14px) scale(.995); }
+          from { opacity: 0; transform: translateY(16px) scale(.98); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes shimmer {
@@ -542,11 +543,15 @@ export default function CashCounter() {
           to   { background-position:  200% center; }
         }
         @keyframes pulseGlow {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(15,214,144,0); }
-          50%       { box-shadow: 0 0 32px 0 rgba(15,214,144,.1); }
+          0%, 100% { box-shadow: 0 8px 40px rgba(4,120,87,.12), 0 2px 8px rgba(0,0,0,.06); }
+          50%       { box-shadow: 0 8px 60px rgba(4,120,87,.25), 0 2px 8px rgba(0,0,0,.06); }
         }
         @keyframes spinnerRotate {
           to { transform: rotate(360deg); }
+        }
+        @keyframes floatIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         *, *::before, *::after {
@@ -554,24 +559,25 @@ export default function CashCounter() {
           touch-action: manipulation;
         }
 
-        /* ── BG mesh ── */
+        /* ── BG ── */
         .bg-mesh {
           position: fixed;
           inset: 0;
           z-index: 0;
           pointer-events: none;
           background:
-            radial-gradient(ellipse 70% 50% at 20% 0%, rgba(15,214,144,.04) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 40% at 80% 100%, rgba(242,184,59,.04) 0%, transparent 60%);
+            radial-gradient(ellipse 60% 50% at 10% 0%, rgba(4,120,87,.06) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 40% at 90% 100%, rgba(180,83,9,.05) 0%, transparent 60%),
+            radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,255,255,.9) 0%, transparent 70%);
         }
         .bg-dots {
           position: fixed;
           inset: 0;
           z-index: 0;
           pointer-events: none;
-          background-image: radial-gradient(circle, #171a2a 1px, transparent 1px);
-          background-size: 24px 24px;
-          opacity: .45;
+          background-image: radial-gradient(circle, rgba(0,0,0,.06) 1px, transparent 1px);
+          background-size: 28px 28px;
+          opacity: 1;
         }
 
         /* ── Sticky header ── */
@@ -579,129 +585,129 @@ export default function CashCounter() {
           position: sticky;
           top: 0;
           z-index: 100;
-          background: rgba(6,8,16,.94);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid #141728;
-          padding: 0 20px;
-          height: 62px;
+          background: #1A1F3E;
+          border-bottom: none;
+          padding: 0 24px;
+          height: 70px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 28px;
+          margin-bottom: 32px;
+          box-shadow: 0 4px 24px rgba(26,31,62,.3), 0 1px 0 rgba(255,255,255,.05);
         }
         .header-logo {
           display: flex;
           align-items: center;
-          gap: 11px;
+          gap: 13px;
         }
         .header-icon {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #0fd690 0%, #00a870 100%);
+          width: 42px;
+          height: 42px;
+          border-radius: 13px;
+          background: linear-gradient(135deg, #10B981 0%, #047857 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 20px;
           flex-shrink: 0;
-          box-shadow: 0 0 0 1px rgba(15,214,144,.25), 0 4px 12px rgba(15,214,144,.15);
+          box-shadow: 0 0 0 2px rgba(16,185,129,.35), 0 4px 16px rgba(16,185,129,.3);
         }
         .header-title {
-          font-size: 15px;
-          font-weight: 700;
-          color: #e0e3f5;
+          font-size: 17px;
+          font-weight: 800;
+          color: #FFFFFF;
           line-height: 1.1;
-          letter-spacing: -.2px;
+          letter-spacing: -.3px;
         }
         .header-subtitle {
-          font-size: 11px;
-          color: #30334e;
-          margin-top: 2px;
+          font-size: 12px;
+          color: rgba(255,255,255,.45);
+          margin-top: 3px;
           font-weight: 500;
           letter-spacing: .3px;
         }
         .header-total-block {
           text-align: left;
-          min-width: 90px;
+          min-width: 100px;
         }
         .header-total-label {
           font-size: 10px;
           font-weight: 700;
-          letter-spacing: 1.2px;
+          letter-spacing: 1.5px;
           text-transform: uppercase;
-          color: #30334e;
-          margin-bottom: 2px;
+          color: rgba(255,255,255,.38);
+          margin-bottom: 3px;
         }
         .header-total-amount {
-          font-size: 20px;
-          font-weight: 800;
+          font-size: 22px;
+          font-weight: 900;
           line-height: 1;
           letter-spacing: -.5px;
           transition: color .3s;
           font-variant-numeric: tabular-nums;
         }
-        .header-total-amount.has-value { color: #0fd690; }
-        .header-total-amount.no-value  { color: #252840; }
+        .header-total-amount.has-value { color: #34D399; }
+        .header-total-amount.no-value  { color: rgba(255,255,255,.18); }
 
         /* ── Cards ── */
         .card {
-          background: #0c0f1c;
-          border: 1px solid #181b2c;
-          border-radius: 18px;
-          padding: 22px 20px;
+          background: #FFFFFF;
+          border: 1.5px solid #EAECF0;
+          border-radius: 20px;
+          padding: 24px 22px;
           position: relative;
           overflow: hidden;
+          box-shadow: 0 2px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.04);
         }
         .card::before {
           content: '';
           position: absolute;
           top: 0; right: 0; left: 0;
-          height: 2px;
-          border-radius: 18px 18px 0 0;
+          height: 4px;
+          border-radius: 20px 20px 0 0;
         }
-        .card-coins::before  { background: linear-gradient(90deg, #0fd690, rgba(15,214,144,0)); }
-        .card-bills::before  { background: linear-gradient(90deg, #f2b83b, rgba(242,184,59,0)); }
-        .card-register::before { background: linear-gradient(90deg, #0fd690, rgba(15,214,144,0)); }
-        .card-register-approx::before { background: linear-gradient(90deg, #f2b83b, rgba(242,184,59,0)); }
-        .card-envelope::before { background: linear-gradient(90deg, #252840, transparent); }
+        .card-coins::before  { background: linear-gradient(90deg, #10B981, #6EE7B7); }
+        .card-bills::before  { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
+        .card-register::before { background: linear-gradient(90deg, #10B981, #6EE7B7); }
+        .card-register-approx::before { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
+        .card-envelope::before { background: linear-gradient(90deg, #CBD5E1, #E2E8F0); }
 
-        .anim-1 { animation: fadeUp .5s cubic-bezier(.22,1,.36,1) .05s both; }
-        .anim-2 { animation: fadeUp .5s cubic-bezier(.22,1,.36,1) .15s both; }
-        .anim-3 { animation: fadeUp .5s cubic-bezier(.22,1,.36,1) .25s both; }
-        .result-anim { animation: resultSlide .4s cubic-bezier(.22,1,.36,1) both; }
+        .anim-1 { animation: fadeUp .55s cubic-bezier(.22,1,.36,1) .05s both; }
+        .anim-2 { animation: fadeUp .55s cubic-bezier(.22,1,.36,1) .18s both; }
+        .anim-3 { animation: fadeUp .55s cubic-bezier(.22,1,.36,1) .30s both; }
+        .result-anim { animation: resultSlide .45s cubic-bezier(.22,1,.36,1) both; }
 
         /* ── Card header ── */
         .card-head {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 22px;
           gap: 10px;
           flex-wrap: wrap;
         }
         .card-head-left {
           display: flex;
           align-items: center;
-          gap: 9px;
+          gap: 10px;
         }
         .section-badge {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: .5px;
-          color: #e0e3f5;
+          gap: 8px;
+          font-size: 15px;
+          font-weight: 800;
+          letter-spacing: -.1px;
+          color: #1A1F3E;
         }
         .section-badge-dot {
-          width: 7px;
-          height: 7px;
+          width: 9px;
+          height: 9px;
           border-radius: 50%;
           flex-shrink: 0;
         }
-        .dot-coin { background: #0fd690; box-shadow: 0 0 6px rgba(15,214,144,.6); }
-        .dot-bill { background: #f2b83b; box-shadow: 0 0 6px rgba(242,184,59,.6); }
+        .dot-coin { background: #10B981; box-shadow: 0 0 8px rgba(16,185,129,.5); }
+        .dot-bill { background: #F59E0B; box-shadow: 0 0 8px rgba(245,158,11,.5); }
         .card-head-controls {
           display: flex;
           align-items: center;
@@ -713,16 +719,16 @@ export default function CashCounter() {
         .sw-wrap {
           display: flex;
           align-items: center;
-          gap: 7px;
+          gap: 8px;
         }
         .sw-track {
-          width: 34px;
-          height: 19px;
-          background: #1a1d2e;
+          width: 36px;
+          height: 20px;
+          background: #E5E7EB;
           border-radius: 10px;
           position: relative;
           cursor: pointer;
-          border: 1px solid #252840;
+          border: 1.5px solid #D1D5DB;
           flex-shrink: 0;
           transition: background .2s, border-color .2s;
           padding: 0;
@@ -730,37 +736,37 @@ export default function CashCounter() {
         .sw-track::after {
           content: '';
           position: absolute;
-          width: 13px;
-          height: 13px;
-          background: #3a3e58;
+          width: 14px;
+          height: 14px;
+          background: #9CA3AF;
           border-radius: 50%;
-          top: 2px;
-          right: 2px;
+          top: 1px;
+          right: 1px;
           transition: right .2s, background .2s;
         }
         .sw-track.on {
-          background: rgba(15,214,144,.2);
-          border-color: rgba(15,214,144,.4);
+          background: rgba(16,185,129,.15);
+          border-color: #10B981;
         }
         .sw-track.on::after {
-          right: 17px;
-          background: #0fd690;
+          right: 18px;
+          background: #10B981;
         }
         .sw-label {
           font-size: 11px;
-          font-weight: 600;
-          color: #353852;
-          letter-spacing: .4px;
+          font-weight: 700;
+          color: #6B7280;
+          letter-spacing: .5px;
           text-transform: uppercase;
         }
 
         /* ── Inputs ── */
         .inp {
-          background: #090b18;
-          border: 1px solid #1a1d2e;
-          border-radius: 10px;
-          color: #d8daf0;
-          padding: 10px 12px;
+          background: #F9FAFB;
+          border: 1.5px solid #E5E7EB;
+          border-radius: 12px;
+          color: #111827;
+          padding: 11px 13px;
           font-family: inherit;
           font-size: 15px;
           width: 100%;
@@ -768,33 +774,34 @@ export default function CashCounter() {
           transition: border-color .2s, background .2s, box-shadow .2s;
           -moz-appearance: textfield;
           font-variant-numeric: tabular-nums;
+          font-weight: 600;
         }
         .inp::-webkit-outer-spin-button,
         .inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .inp:focus {
-          border-color: #0fd690;
-          background: #080f0d;
-          box-shadow: 0 0 0 3px rgba(15,214,144,.06);
+          border-color: #10B981;
+          background: #FFFFFF;
+          box-shadow: 0 0 0 3px rgba(16,185,129,.12);
         }
         .inp.bill-focus:focus {
-          border-color: #f2b83b;
-          background: #0f0d07;
-          box-shadow: 0 0 0 3px rgba(242,184,59,.06);
+          border-color: #F59E0B;
+          background: #FFFFFF;
+          box-shadow: 0 0 0 3px rgba(245,158,11,.12);
         }
         .inp.err {
-          border-color: #f05252;
-          box-shadow: 0 0 0 3px rgba(240,82,82,.06);
+          border-color: #EF4444;
+          box-shadow: 0 0 0 3px rgba(239,68,68,.1);
         }
-        .inp::placeholder { color: #1e2235; }
-        .inp[readonly] { opacity: .28; cursor: default; pointer-events: none; }
+        .inp::placeholder { color: #D1D5DB; }
+        .inp[readonly] { opacity: .35; cursor: default; pointer-events: none; }
 
         /* ── Sub labels ── */
         .sub-label {
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 700;
-          letter-spacing: 1px;
+          letter-spacing: .8px;
           text-transform: uppercase;
-          color: #2e3252;
+          color: #9CA3AF;
           margin-bottom: 5px;
         }
 
@@ -802,23 +809,23 @@ export default function CashCounter() {
         .denom-chip {
           display: inline-flex;
           align-items: center;
-          padding: 3px 9px;
-          border-radius: 6px;
-          font-size: 12px;
+          padding: 4px 10px;
+          border-radius: 8px;
+          font-size: 13px;
           font-weight: 700;
           letter-spacing: .3px;
-          margin-bottom: 9px;
+          margin-bottom: 8px;
           font-variant-numeric: tabular-nums;
         }
         .chip-coin {
-          background: rgba(15,214,144,.08);
-          border: 1px solid rgba(15,214,144,.18);
-          color: #0fd690;
+          background: #ECFDF5;
+          border: 1px solid #A7F3D0;
+          color: #047857;
         }
         .chip-bill {
-          background: rgba(242,184,59,.08);
-          border: 1px solid rgba(242,184,59,.18);
-          color: #f2b83b;
+          background: #FFFBEB;
+          border: 1px solid #FDE68A;
+          color: #B45309;
         }
 
         /* ── Grid ── */
@@ -826,15 +833,15 @@ export default function CashCounter() {
         .grid-2 {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 14px;
+          gap: 16px;
         }
 
         /* ── Error msg ── */
         .err-msg {
-          color: #f08080;
+          color: #EF4444;
           font-size: 11px;
           margin-top: 5px;
-          font-weight: 500;
+          font-weight: 600;
         }
 
         /* ── Section total row ── */
@@ -842,43 +849,43 @@ export default function CashCounter() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-top: 18px;
-          padding-top: 14px;
-          border-top: 1px solid #14172a;
+          margin-top: 20px;
+          padding-top: 16px;
+          border-top: 1.5px solid #F3F4F6;
         }
         .section-total-label {
           font-size: 12px;
           font-weight: 700;
           letter-spacing: .8px;
           text-transform: uppercase;
-          color: #353858;
+          color: #9CA3AF;
         }
         .section-total-amount {
-          font-size: 16px;
-          font-weight: 800;
-          letter-spacing: -.3px;
+          font-size: 18px;
+          font-weight: 900;
+          letter-spacing: -.5px;
           font-variant-numeric: tabular-nums;
         }
-        .coin-total-amount { color: #0fd690; }
-        .bill-total-amount { color: #f2b83b; }
+        .coin-total-amount { color: #047857; }
+        .bill-total-amount { color: #B45309; }
 
         /* ── Calculate button ── */
         .btn-calc {
           width: 100%;
-          padding: 16px;
+          padding: 17px;
           border: none;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #0fd690 0%, #00a870 100%);
-          color: #050810;
-          font-size: 15px;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+          color: #FFFFFF;
+          font-size: 16px;
           font-family: inherit;
           font-weight: 800;
           cursor: pointer;
-          letter-spacing: .5px;
-          transition: filter .15s, transform .1s, box-shadow .2s;
+          letter-spacing: .3px;
+          transition: filter .15s, transform .12s, box-shadow .2s;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 4px 20px rgba(15,214,144,.2), 0 1px 4px rgba(0,0,0,.3);
+          box-shadow: 0 4px 24px rgba(16,185,129,.4), 0 2px 6px rgba(0,0,0,.1);
         }
         .btn-calc::after {
           content: '';
@@ -891,31 +898,35 @@ export default function CashCounter() {
         }
         .btn-calc:hover::after { opacity: 1; animation: shimmer 1.1s linear infinite; }
         .btn-calc:hover {
-          filter: brightness(1.08);
-          box-shadow: 0 6px 28px rgba(15,214,144,.3), 0 2px 6px rgba(0,0,0,.3);
+          filter: brightness(1.06);
+          box-shadow: 0 6px 32px rgba(16,185,129,.5), 0 2px 8px rgba(0,0,0,.12);
+          transform: translateY(-1px);
         }
-        .btn-calc:active { transform: scale(.98); }
+        .btn-calc:active { transform: scale(.98) translateY(0); }
 
         /* ── Report button ── */
         .btn-report {
           width: 100%;
-          padding: 13px;
-          border: 1px solid #1c2038;
-          border-radius: 14px;
-          background: transparent;
-          color: #353858;
-          font-size: 13px;
+          padding: 14px;
+          border: 1.5px solid #E5E7EB;
+          border-radius: 16px;
+          background: #FFFFFF;
+          color: #6B7280;
+          font-size: 14px;
           font-family: inherit;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
           transition: all .2s;
           margin-top: 10px;
           letter-spacing: .3px;
+          box-shadow: 0 1px 4px rgba(0,0,0,.05);
         }
         .btn-report:hover {
-          border-color: rgba(15,214,144,.25);
-          color: #0fd690;
-          background: rgba(15,214,144,.04);
+          border-color: #10B981;
+          color: #047857;
+          background: #F0FDF4;
+          box-shadow: 0 2px 12px rgba(16,185,129,.15);
+          transform: translateY(-1px);
         }
         .btn-report:active { transform: scale(.98); }
 
@@ -927,113 +938,113 @@ export default function CashCounter() {
           margin-bottom: 18px;
         }
         .result-label {
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: 1.5px;
           text-transform: uppercase;
-          color: #2e3252;
+          color: #9CA3AF;
           margin-bottom: 8px;
         }
         .result-amount {
-          font-size: 36px;
+          font-size: 42px;
           font-weight: 900;
-          letter-spacing: -1.5px;
+          letter-spacing: -2px;
           line-height: 1;
           font-variant-numeric: tabular-nums;
         }
-        .amount-exact   { color: #0fd690; }
-        .amount-approx  { color: #f2b83b; }
+        .amount-exact   { color: #047857; }
+        .amount-approx  { color: #B45309; }
         .status-badge {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
-          padding: 5px 12px;
+          gap: 6px;
+          padding: 6px 14px;
           border-radius: 20px;
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 700;
-          letter-spacing: .5px;
+          letter-spacing: .3px;
           margin-top: 3px;
           flex-shrink: 0;
         }
         .badge-exact {
-          background: rgba(15,214,144,.1);
-          border: 1px solid rgba(15,214,144,.3);
-          color: #0fd690;
+          background: #ECFDF5;
+          border: 1.5px solid #6EE7B7;
+          color: #047857;
         }
         .badge-approx {
-          background: rgba(242,184,59,.1);
-          border: 1px solid rgba(242,184,59,.3);
-          color: #f2b83b;
+          background: #FFFBEB;
+          border: 1.5px solid #FCD34D;
+          color: #B45309;
         }
 
         /* ── Result rows ── */
         .result-divider {
-          height: 1px;
-          background: #14172a;
-          margin: 14px 0;
+          height: 1.5px;
+          background: #F3F4F6;
+          margin: 16px 0;
         }
         .res-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 8px 0;
+          padding: 9px 0;
           font-size: 14px;
-          border-bottom: 1px solid #0e1020;
+          border-bottom: 1px solid #F9FAFB;
         }
         .res-row:last-child { border-bottom: none; }
-        .res-row-label { color: #4a5070; font-weight: 500; }
-        .res-row-value { font-weight: 700; color: #9aa0c0; font-variant-numeric: tabular-nums; }
+        .res-row-label { color: #6B7280; font-weight: 600; }
+        .res-row-value { font-weight: 800; color: #1A1F3E; font-variant-numeric: tabular-nums; }
 
         /* ── Denomination pill ── */
         .denom-pill {
           display: inline-flex;
           align-items: center;
-          padding: 1px 8px;
-          border-radius: 5px;
+          padding: 2px 8px;
+          border-radius: 6px;
           font-size: 11px;
           font-weight: 700;
           margin-left: 7px;
           font-variant-numeric: tabular-nums;
         }
         .pill-coin-reg {
-          background: rgba(15,214,144,.08);
-          border: 1px solid rgba(15,214,144,.2);
-          color: #0fd690;
+          background: #ECFDF5;
+          border: 1px solid #A7F3D0;
+          color: #047857;
         }
         .pill-bill-reg {
-          background: rgba(242,184,59,.08);
-          border: 1px solid rgba(242,184,59,.2);
-          color: #f2b83b;
+          background: #FFFBEB;
+          border: 1px solid #FDE68A;
+          color: #B45309;
         }
         .pill-env {
-          background: rgba(255,255,255,.04);
-          border: 1px solid rgba(255,255,255,.08);
-          color: #3a3e58;
+          background: #F9FAFB;
+          border: 1px solid #E5E7EB;
+          color: #9CA3AF;
         }
 
         /* ── Notices ── */
         .notice {
-          border-radius: 10px;
-          padding: 11px 14px;
+          border-radius: 12px;
+          padding: 12px 16px;
           font-size: 13px;
           margin-top: 12px;
-          line-height: 1.55;
-          font-weight: 500;
+          line-height: 1.6;
+          font-weight: 600;
         }
         .notice-warn {
-          background: rgba(240,82,82,.06);
-          border: 1px solid rgba(240,82,82,.2);
-          color: #f08080;
+          background: #FFF5F5;
+          border: 1.5px solid #FECACA;
+          color: #DC2626;
         }
         .notice-info {
-          background: rgba(15,214,144,.06);
-          border: 1px solid rgba(15,214,144,.18);
-          color: #0fd690;
+          background: #ECFDF5;
+          border: 1.5px solid #A7F3D0;
+          color: #047857;
         }
         .notice-gap {
-          background: rgba(242,184,59,.06);
-          border: 1px solid rgba(242,184,59,.2);
-          color: #d4a030;
+          background: #FFFBEB;
+          border: 1.5px solid #FDE68A;
+          color: #B45309;
         }
 
         /* ── Glow on exact register ── */
@@ -1043,23 +1054,23 @@ export default function CashCounter() {
 
         /* ── Scroll margin for sticky header ── */
         .scroll-target {
-          scroll-margin-top: 76px;
+          scroll-margin-top: 86px;
         }
 
         @media (max-width: 430px) {
-          .card { padding: 18px 15px; }
-          .btn-calc { padding: 15px; font-size: 15px; min-height: 52px; }
+          .card { padding: 20px 16px; }
+          .btn-calc { padding: 16px; font-size: 15px; min-height: 54px; }
           .btn-report { min-height: 48px; }
-          .inp { padding: 10px 10px; min-height: 44px; font-size: 14px; }
+          .inp { padding: 11px 12px; min-height: 46px; font-size: 15px; }
           .inp-row { flex-direction: column; gap: 8px; }
-          .result-amount { font-size: 30px; }
-          .card-head { margin-bottom: 16px; }
-          .grid-2 { gap: 12px; }
+          .result-amount { font-size: 34px; }
+          .card-head { margin-bottom: 18px; }
+          .grid-2 { gap: 14px; }
         }
 
         @media (max-width: 360px) {
           .card-head-controls { gap: 7px; }
-          .sticky-header { padding: 0 14px; }
+          .sticky-header { padding: 0 16px; }
         }
       `}</style>
 
@@ -1312,7 +1323,7 @@ export default function CashCounter() {
             <div
               ref={registerRef}
               className={`card result-anim scroll-target ${isExact ? "card-register register-glow" : "card-register-approx"}`}
-              style={{ marginBottom: 10, borderColor: isExact ? "rgba(15,214,144,.2)" : "rgba(242,184,59,.18)" }}
+              style={{ marginBottom: 10, borderColor: isExact ? "rgba(16,185,129,.25)" : "rgba(245,158,11,.25)" }}
             >
               <div className="result-header">
                 <div>
@@ -1333,11 +1344,11 @@ export default function CashCounter() {
                   <span className="res-row-label">מטבעות</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {result.coinsRemoved > 0 && result.type !== "coins_over" && (
-                      <span style={{ color: "#f08080", fontSize: 12, fontWeight: 600 }}>
+                      <span style={{ color: "#DC2626", fontSize: 12, fontWeight: 600 }}>
                         הוצא {fmt(result.coinsRemoved)}
                       </span>
                     )}
-                    <span className="res-row-value" style={{ color: "#bcc0d8" }}>{fmt(result.coinsInRegister)}</span>
+                    <span className="res-row-value">{fmt(result.coinsInRegister)}</span>
                   </div>
                 </div>
 
@@ -1374,15 +1385,15 @@ export default function CashCounter() {
             </div>
 
             {/* Envelope card */}
-            <div className="card card-envelope result-anim" style={{ animationDelay: ".08s", borderColor: "#141728" }}>
+            <div className="card card-envelope result-anim" style={{ animationDelay: ".08s", borderColor: "#E2E8F0" }}>
               <div className="result-header" style={{ marginBottom: envelopeTotal > 0 ? 0 : 0 }}>
                 <div>
                   <div className="result-label">במעטפה</div>
                   <div style={{
-                    fontSize: 22,
-                    fontWeight: 800,
-                    letterSpacing: "-.5px",
-                    color: envelopeTotal > 0 ? "#4a5070" : "#1e2235",
+                    fontSize: 26,
+                    fontWeight: 900,
+                    letterSpacing: "-.8px",
+                    color: envelopeTotal > 0 ? "#374151" : "#D1D5DB",
                     fontVariantNumeric: "tabular-nums",
                   }}>
                     {fmt(envelopeTotal)}
@@ -1416,7 +1427,7 @@ export default function CashCounter() {
               )}
 
               {envelopeTotal === 0 && (
-                <div style={{ color: "#1e2235", fontSize: 13, marginTop: 6, fontWeight: 500 }}>
+                <div style={{ color: "#9CA3AF", fontSize: 13, marginTop: 6, fontWeight: 600 }}>
                   המעטפה ריקה — הכל בקופה
                 </div>
               )}
