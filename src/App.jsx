@@ -526,6 +526,8 @@ export default function CashCounter() {
       color: "#374151",
       fontFamily: "'Heebo', sans-serif",
       paddingBottom: 80,
+      overflowX: "hidden",
+      maxWidth: "100vw",
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
