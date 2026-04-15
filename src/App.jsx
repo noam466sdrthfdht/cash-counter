@@ -116,6 +116,67 @@ function solve(coinsTotal, billCounts) {
   };
 }
 
+function generateSplits(amount) {
+  const smallerDenoms = BILL_DENOMS.filter(d => d < amount);
+  const results = [];
+  function recurse(remaining, idx, current) {
+    if (remaining === 0) { results.push({ ...current }); return; }
+    if (idx >= smallerDenoms.length) return;
+    const d = smallerDenoms[idx];
+    const maxCount = Math.floor(remaining / d);
+    for (let c = maxCount; c >= 0; c--) {
+      const next = { ...current };
+      if (c > 0) next[d] = c;
+      recurse(remaining - c * d, idx + 1, next);
+    }
+  }
+  recurse(amount, 0, {});
+  return results.filter(s => Object.keys(s).length > 0);
+}
+
+function suggestBillBreak(coinsTotal, billCounts, currentResult) {
+  if (currentResult.type !== "exact_remove") return null;
+  const fracPart = +(coinsTotal - Math.floor(coinsTotal)).toFixed(2);
+  const bestK = +(currentResult.coinsRemoved - fracPart).toFixed(2);
+  if (bestK < 20) return null;
+
+  // For each denomination (smallest first), find the best coinsRemoved and all splits achieving it
+  const candidates = [];
+
+  for (const d of [50, 100, 200]) {
+    if ((billCounts[d] || 0) === 0) continue;
+    const splits = generateSplits(d);
+    if (splits.length === 0) continue;
+
+    let bestForDenom = Infinity;
+    const denomResults = [];
+
+    for (const split of splits) {
+      const newCounts = { ...billCounts, [d]: billCounts[d] - 1 };
+      for (const [sd, sc] of Object.entries(split)) {
+        newCounts[+sd] = (newCounts[+sd] || 0) + sc;
+      }
+      const newCoinsRemoved = solve(coinsTotal, newCounts).coinsRemoved;
+      denomResults.push({ split, newCoinsRemoved });
+      if (newCoinsRemoved < bestForDenom) bestForDenom = newCoinsRemoved;
+    }
+
+    const bestSplits = denomResults
+      .filter(r => Math.abs(r.newCoinsRemoved - bestForDenom) < 0.001)
+      .map(r => r.split);
+    candidates.push({ breakDenom: d, splits: bestSplits, newCoinsRemoved: bestForDenom });
+  }
+
+  if (candidates.length === 0) return null;
+
+  const globalMin = Math.min(...candidates.map(c => c.newCoinsRemoved));
+  if (globalMin >= currentResult.coinsRemoved) return null;
+
+  // Smallest denomination that achieves the global minimum
+  const best = candidates.find(c => Math.abs(c.newCoinsRemoved - globalMin) < 0.001);
+  return { breakDenom: best.breakDenom, splits: best.splits, newCoinsRemoved: globalMin };
+}
+
 const fmt = (n) =>
   n % 1 === 0 ? `₪${n.toLocaleString("he-IL")}` : `₪${n.toFixed(2)}`;
 
@@ -333,6 +394,7 @@ export default function CashCounter() {
   const [simpleCoinsInput, setSimpleCoinsInput] = useState("");
   const [billInputs, setBillInputs] = useState({ 20: "", 50: "", 100: "", 200: "" });
   const [result, setResult] = useState(null);
+  const [suggestion, setSuggestion] = useState(null);
   const [errors, setErrors] = useState({});
   const registerRef = useRef(null);
 
@@ -424,7 +486,9 @@ export default function CashCounter() {
       }
     });
 
-    setResult(solve(coinsTotalVal, billCounts));
+    const res = solve(coinsTotalVal, billCounts);
+    setResult(res);
+    setSuggestion(suggestBillBreak(coinsTotalVal, billCounts, res));
     setTimeout(
       () => registerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
       80
@@ -457,6 +521,7 @@ export default function CashCounter() {
     });
     setCoinMode(newMode);
     setResult(null);
+    setSuggestion(null);
     setErrors({});
   };
 
@@ -480,6 +545,7 @@ export default function CashCounter() {
     });
     setBillMode(newMode);
     setResult(null);
+    setSuggestion(null);
     setErrors({});
   };
 
@@ -1112,7 +1178,7 @@ export default function CashCounter() {
               <div className="sw-wrap">
                 <button
                   className={`sw-track${simpleCoins ? " on" : ""}`}
-                  onClick={() => { setSimpleCoins(s => !s); setErrors({}); setResult(null); }}
+                  onClick={() => { setSimpleCoins(s => !s); setErrors({}); setResult(null); setSuggestion(null); }}
                 />
                 <span className="sw-label">פשוט</span>
               </div>
@@ -1385,6 +1451,18 @@ export default function CashCounter() {
                 )}
               </div>
             </div>
+
+            {/* Bill break suggestion */}
+            {suggestion && (
+              <div className="notice notice-warn" style={{ marginTop: 10 }}>
+                <div>💡 פרוט שטר ₪{suggestion.breakDenom} — יפחית מטבעות להוצאה מ-{fmt(result.coinsRemoved)} ל-{fmt(suggestion.newCoinsRemoved)}:</div>
+                {suggestion.splits.map((split, i) => (
+                  <div key={i} style={{ marginTop: 4, paddingRight: 12 }}>
+                    {"•"} {Object.entries(split).sort(([a],[b]) => +b - +a).map(([d,c]) => `${c}×₪${d}`).join(' + ')}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Envelope card */}
             <div className="card card-envelope result-anim" style={{ animationDelay: ".08s", borderColor: "#E2E8F0" }}>
