@@ -140,7 +140,6 @@ function suggestBillBreak(coinsTotal, billCounts, currentResult) {
   const bestK = +(currentResult.coinsRemoved - fracPart).toFixed(2);
   if (bestK < 20) return null;
 
-  // For each denomination (smallest first), find the best coinsRemoved and all splits achieving it
   const candidates = [];
 
   for (const d of [50, 100, 200]) {
@@ -157,24 +156,34 @@ function suggestBillBreak(coinsTotal, billCounts, currentResult) {
         newCounts[+sd] = (newCounts[+sd] || 0) + sc;
       }
       const newCoinsRemoved = solve(coinsTotal, newCounts).coinsRemoved;
-      denomResults.push({ split, newCoinsRemoved });
+      if (newCoinsRemoved < currentResult.coinsRemoved) {
+        denomResults.push({ split, newCoinsRemoved });
+      }
       if (newCoinsRemoved < bestForDenom) bestForDenom = newCoinsRemoved;
     }
 
-    const bestSplits = denomResults
-      .filter(r => Math.abs(r.newCoinsRemoved - bestForDenom) < 0.001)
-      .map(r => r.split);
-    candidates.push({ breakDenom: d, splits: bestSplits, newCoinsRemoved: bestForDenom });
+    if (denomResults.length > 0) {
+      denomResults.sort((a, b) => a.newCoinsRemoved - b.newCoinsRemoved);
+      candidates.push({ breakDenom: d, options: denomResults, bestForDenom });
+    }
   }
 
   if (candidates.length === 0) return null;
 
-  const globalMin = Math.min(...candidates.map(c => c.newCoinsRemoved));
-  if (globalMin >= currentResult.coinsRemoved) return null;
+  const globalMin = Math.min(...candidates.map(c => c.bestForDenom));
 
-  // Smallest denomination that achieves the global minimum
-  const best = candidates.find(c => Math.abs(c.newCoinsRemoved - globalMin) < 0.001);
-  return { breakDenom: best.breakDenom, splits: best.splits, newCoinsRemoved: globalMin };
+  // Smallest denomination achieving global min, with all its tied splits
+  const best = candidates.find(c => Math.abs(c.bestForDenom - globalMin) < 0.001);
+  const bestSplits = best.options
+    .filter(o => Math.abs(o.newCoinsRemoved - globalMin) < 0.001)
+    .map(o => o.split);
+
+  return {
+    breakDenom: best.breakDenom,
+    splits: bestSplits,
+    newCoinsRemoved: globalMin,
+    allCandidates: candidates,
+  };
 }
 
 const fmt = (n) =>
@@ -395,6 +404,7 @@ export default function CashCounter() {
   const [billInputs, setBillInputs] = useState({ 20: "", 50: "", 100: "", 200: "" });
   const [result, setResult] = useState(null);
   const [suggestion, setSuggestion] = useState(null);
+  const [showAllSplits, setShowAllSplits] = useState(false);
   const [errors, setErrors] = useState({});
   const registerRef = useRef(null);
 
@@ -489,6 +499,7 @@ export default function CashCounter() {
     const res = solve(coinsTotalVal, billCounts);
     setResult(res);
     setSuggestion(suggestBillBreak(coinsTotalVal, billCounts, res));
+    setShowAllSplits(false);
     setTimeout(
       () => registerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
       80
@@ -522,6 +533,7 @@ export default function CashCounter() {
     setCoinMode(newMode);
     setResult(null);
     setSuggestion(null);
+    setShowAllSplits(false);
     setErrors({});
   };
 
@@ -546,6 +558,7 @@ export default function CashCounter() {
     setBillMode(newMode);
     setResult(null);
     setSuggestion(null);
+    setShowAllSplits(false);
     setErrors({});
   };
 
@@ -1178,7 +1191,7 @@ export default function CashCounter() {
               <div className="sw-wrap">
                 <button
                   className={`sw-track${simpleCoins ? " on" : ""}`}
-                  onClick={() => { setSimpleCoins(s => !s); setErrors({}); setResult(null); setSuggestion(null); }}
+                  onClick={() => { setSimpleCoins(s => !s); setErrors({}); setResult(null); setSuggestion(null); setShowAllSplits(false); }}
                 />
                 <span className="sw-label">פשוט</span>
               </div>
@@ -1458,9 +1471,43 @@ export default function CashCounter() {
                 <div>💡 פרוט שטר ₪{suggestion.breakDenom} — יפחית מטבעות להוצאה מ-{fmt(result.coinsRemoved)} ל-{fmt(suggestion.newCoinsRemoved)}:</div>
                 {suggestion.splits.map((split, i) => (
                   <div key={i} style={{ marginTop: 4, paddingRight: 12 }}>
-                    {"•"} {Object.entries(split).sort(([a],[b]) => +b - +a).map(([d,c]) => `${c}×₪${d}`).join(' + ')}
+                    • {Object.entries(split).sort(([a],[b]) => +b - +a).map(([d,c]) => `${c}×₪${d}`).join(' + ')}
                   </div>
                 ))}
+                <button
+                  onClick={() => setShowAllSplits(s => !s)}
+                  style={{
+                    marginTop: 10,
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#DC2626",
+                    fontFamily: "inherit",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    padding: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  {showAllSplits ? "▲" : "▼"} כל האפשרויות
+                </button>
+                {showAllSplits && (
+                  <div style={{ marginTop: 8, borderTop: "1px solid #FECACA", paddingTop: 8 }}>
+                    {suggestion.allCandidates.map(cand => (
+                      <div key={cand.breakDenom} style={{ marginBottom: 8 }}>
+                        <div style={{ fontWeight: 700, marginBottom: 4 }}>פרוט ₪{cand.breakDenom}:</div>
+                        {cand.options.map((opt, i) => (
+                          <div key={i} style={{ paddingRight: 12, marginBottom: 2 }}>
+                            • {Object.entries(opt.split).sort(([a],[b]) => +b - +a).map(([d,c]) => `${c}×₪${d}`).join(' + ')}
+                            {" "}→ {fmt(opt.newCoinsRemoved)} מטבעות
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
