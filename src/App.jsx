@@ -405,8 +405,10 @@ export default function CashCounter() {
   const [result, setResult] = useState(null);
   const [suggestion, setSuggestion] = useState(null);
   const [showAllSplits, setShowAllSplits] = useState(false);
+  const [showSplitWarning, setShowSplitWarning] = useState(false);
   const [errors, setErrors] = useState({});
   const registerRef = useRef(null);
+  const suggestionRef = useRef(null);
 
   const computeCoinsTotal = () => {
     if (simpleCoins) return parseFloat(simpleCoinsInput) || 0;
@@ -497,13 +499,18 @@ export default function CashCounter() {
     });
 
     const res = solve(coinsTotalVal, billCounts);
+    const sugg = suggestBillBreak(coinsTotalVal, billCounts, res);
     setResult(res);
-    setSuggestion(suggestBillBreak(coinsTotalVal, billCounts, res));
+    setSuggestion(sugg);
     setShowAllSplits(false);
-    setTimeout(
-      () => registerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      80
-    );
+    if (sugg) {
+      setShowSplitWarning(true);
+    } else {
+      setTimeout(
+        () => registerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+        80
+      );
+    }
   };
 
   const envelopeTotal = result
@@ -1467,8 +1474,8 @@ export default function CashCounter() {
 
             {/* Bill break suggestion */}
             {suggestion && (
-              <div className="notice notice-warn" style={{ marginTop: 10 }}>
-                <div>💡 פרוט שטר ₪{suggestion.breakDenom} — יפחית מטבעות להוצאה מ-{fmt(result.coinsRemoved)} ל-{fmt(suggestion.newCoinsRemoved)}:</div>
+              <div ref={suggestionRef} className="notice notice-warn scroll-target" style={{ marginTop: 10 }}>
+                <div>💡 פריטת שטר ₪{suggestion.breakDenom} — תפחית את המטבעות להוצאה מ-{fmt(result.coinsRemoved)} ל-{fmt(suggestion.newCoinsRemoved)}:</div>
                 {suggestion.splits.map((split, i) => (
                   <div key={i} style={{ marginTop: 4, paddingRight: 12 }}>
                     • {Object.entries(split).sort(([a],[b]) => +b - +a).map(([d,c]) => `${c}×₪${d}`).join(' + ')}
@@ -1491,21 +1498,42 @@ export default function CashCounter() {
                     gap: 4,
                   }}
                 >
-                  {showAllSplits ? "▲" : "▼"} כל האפשרויות
+                  {showAllSplits ? "▲" : "▼"} כל אפשרויות הפריטה
                 </button>
                 {showAllSplits && (
                   <div style={{ marginTop: 8, borderTop: "1px solid #FECACA", paddingTop: 8 }}>
-                    {suggestion.allCandidates.map(cand => (
-                      <div key={cand.breakDenom} style={{ marginBottom: 8 }}>
-                        <div style={{ fontWeight: 700, marginBottom: 4 }}>פרוט ₪{cand.breakDenom}:</div>
-                        {cand.options.map((opt, i) => (
-                          <div key={i} style={{ paddingRight: 12, marginBottom: 2 }}>
-                            • {Object.entries(opt.split).sort(([a],[b]) => +b - +a).map(([d,c]) => `${c}×₪${d}`).join(' + ')}
-                            {" "}→ {fmt(opt.newCoinsRemoved)} מטבעות
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                    {suggestion.allCandidates.map(cand => {
+                      const denomKeys = [...new Set(cand.options.flatMap(o => Object.keys(o.split).map(Number)))].sort((a,b) => b - a);
+                      return (
+                        <div key={cand.breakDenom} style={{ marginBottom: 14 }}>
+                          <div style={{ fontWeight: 700, marginBottom: 8 }}>פריטת ₪{cand.breakDenom}:</div>
+                          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                            <thead>
+                              <tr>
+                                {denomKeys.map(d => (
+                                  <th key={d} style={{ padding: "4px 6px", background: "#FEE2E2", color: "#991B1B", fontWeight: 700, borderRadius: 4, textAlign: "center" }}>₪{d}</th>
+                                ))}
+                                <th style={{ padding: "4px 6px", color: "#6B7280", fontWeight: 700, textAlign: "center" }}>מטבעות להוצאה</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {cand.options.map((opt, i) => (
+                                <tr key={i} style={{ background: i % 2 === 0 ? "transparent" : "rgba(254,226,226,.3)" }}>
+                                  {denomKeys.map(d => (
+                                    <td key={d} style={{ padding: "5px 6px", textAlign: "center", fontWeight: 700, color: "#1A1F3E" }}>
+                                      {opt.split[d] ?? "—"}
+                                    </td>
+                                  ))}
+                                  <td style={{ padding: "5px 6px", textAlign: "center", fontWeight: 700, color: "#DC2626" }}>
+                                    {fmt(opt.newCoinsRemoved)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1564,6 +1592,62 @@ export default function CashCounter() {
         )}
 
       </div>
+
+      {/* ── Split warning popup ── */}
+      {showSplitWarning && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 999,
+          background: "rgba(0,0,0,.45)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+        }}>
+          <div style={{
+            background: "#FFFFFF",
+            borderRadius: 20,
+            padding: "28px 24px",
+            maxWidth: 360,
+            width: "100%",
+            boxShadow: "0 20px 60px rgba(0,0,0,.25)",
+            animation: "floatIn .3s cubic-bezier(.22,1,.36,1) both",
+            textAlign: "center",
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>💡</div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: "#1A1F3E", marginBottom: 8 }}>
+              כדאי לפרוט שטר
+            </div>
+            <div style={{ fontSize: 14, color: "#6B7280", fontWeight: 600, lineHeight: 1.6, marginBottom: 20 }}>
+              פריטת שטר של ₪{suggestion?.breakDenom} תפחית את המטבעות שיש להוציא מ-{fmt(result?.coinsRemoved)} ל-{fmt(suggestion?.newCoinsRemoved)}
+            </div>
+            <button
+              onClick={() => {
+                setShowSplitWarning(false);
+                setTimeout(() => {
+                  suggestionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 80);
+              }}
+              style={{
+                width: "100%",
+                padding: "14px",
+                border: "none",
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)",
+                color: "#FFFFFF",
+                fontSize: 15,
+                fontFamily: "inherit",
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(220,38,38,.35)",
+              }}
+            >
+              הצג אפשרויות פריטה
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
